@@ -18,4 +18,4 @@ Then open http://localhost:8081.
 - `src/scoring/rubric.ts` loads `../rubric.json` (criteria, weights, thresholds, measurement fields, required photos). `metro.config.js` lets the bundler see the repo root for this.
 - `src/scoring/score.ts` one scoring function per rubric criterion id. Every result has a reason and a tip.
 - `src/state/submission.tsx` in-memory state. Gender and age band are kept apart and never passed to scoring.
-- `src/photo/luminance.web.ts` measures brightness in the browser. On iOS it is not measured yet, and the Exposure criterion says so.
+- `src/photo/analyze.ts` pure pixel analysis for the lighting criteria (clipped highlights, clipped shadows, sharpness, colour cast). `measure.web.ts` runs it on a canvas in the browser. On iOS the lighting criteria show as "Not measured" and are left out of the total.

@@ -15,6 +15,8 @@ export default function Score() {
   // Scoring sees photos and measurements only; group attributes are never passed in.
   const report = useMemo(() => scoreSubmission({ photos: s.photos, measurements: s.measurements }), [s.photos, s.measurements]);
 
+  const notMeasured = report.criteria.filter((r) => r.score === null).length;
+
   if (!s.consented) return <Redirect href="/consent" />;
   if (!requiredPhotos.some((id) => s.photos[id])) return <Redirect href="/profile" />;
 
@@ -27,6 +29,8 @@ export default function Score() {
         </View>
         <Lede style={{ marginTop: 12 }}>
           This is the score under the prototype&apos;s provisional rubric. It measures how complete and technically clear your submission is, not how you look. Each criterion below shows how it was scored.
+          {notMeasured > 0 &&
+            ` ${notMeasured} ${notMeasured > 1 ? 'criteria' : 'criterion'} could not be measured and ${notMeasured > 1 ? 'are' : 'is'} left out, so the total is out of the remaining ${report.countedWeight} points, scaled to 100.`}
         </Lede>
         <View style={local.thumbs}>
           {requiredPhotos.map((id) => {
@@ -66,13 +70,23 @@ function CriterionCard({ r }: { r: ScoredCriterion }) {
     <View style={[local.crit, { backgroundColor: c.surface, borderColor: c.line }]}>
       <View style={local.head}>
         <H3>{r.criterion.name}</H3>
-        <Text>
-          <Text style={[local.score, { color: c.ink }]}>{r.score}/100</Text>
-          <Text style={[ui.small, { color: c.muted }]}>{`  adds ${r.points} of ${r.criterion.weight} points`}</Text>
-        </Text>
+        {r.score === null ? (
+          <Text>
+            <Text style={[local.score, { color: c.muted }]}>Not measured</Text>
+            <Text style={[ui.small, { color: c.muted }]}>{`  not counted (worth ${r.criterion.weight} points)`}</Text>
+          </Text>
+        ) : (
+          <Text>
+            <Text style={[local.score, { color: c.ink }]}>{r.score}/100</Text>
+            <Text style={[ui.small, { color: c.muted }]}>{`  adds ${r.points} of ${r.criterion.weight} points`}</Text>
+          </Text>
+        )}
       </View>
-      <View role="img" accessibilityLabel={`${r.score} out of 100`} style={[local.bar, { backgroundColor: c.line }]}>
-        <View style={{ width: `${r.score}%`, height: '100%', backgroundColor: c.accent }} />
+      <View
+        role="img"
+        accessibilityLabel={r.score === null ? 'Not measured' : `${r.score} out of 100`}
+        style={[local.bar, { backgroundColor: c.line }]}>
+        <View style={{ width: `${r.score ?? 0}%`, height: '100%', backgroundColor: c.accent }} />
       </View>
       <Text style={[ui.body, { color: c.ink, marginTop: 12 }]}>{r.reason}</Text>
       <Text

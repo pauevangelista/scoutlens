@@ -1,7 +1,11 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "provisional",
-  "note": "Placeholder criteria on submission quality. Replace with scout-derived criteria after interviews.",
+  "note": "Placeholder criteria on submission quality. Replace with scout-derived criteria after interviews. Lighting thresholds are first estimates and need calibrating.",
+  "analysis": {
+    "shortSidePx": 512,
+    "note": "Photos are scaled to this shorter side in the browser before the lighting criteria are measured."
+  },
   "criteria": [
     {
       "id": "set",
@@ -18,11 +22,40 @@
       "params": { "targetShortSidePx": 1200 }
     },
     {
-      "id": "light",
-      "name": "Exposure",
-      "weight": 20,
-      "description": "Average brightness. Full marks between 35% and 70%, falling to zero at 10% and 95%.",
-      "params": { "fullMin": 0.35, "fullMax": 0.70, "zeroLow": 0.10, "zeroHigh": 0.95 }
+      "id": "highlights",
+      "name": "Clipped highlights",
+      "weight": 5,
+      "description": "Share of pixels blown out to pure white (any channel at or above clipLevel). Full marks up to fullMax, zero at zeroAt.",
+      "params": { "clipLevel": 250, "fullMax": 0.01, "zeroAt": 0.10 }
+    },
+    {
+      "id": "shadows",
+      "name": "Clipped shadows",
+      "weight": 5,
+      "description": "Share of pixels crushed to pure black (every channel at or below clipLevel). Full marks up to fullMax, zero at zeroAt.",
+      "params": { "clipLevel": 5, "fullMax": 0.01, "zeroAt": 0.10 }
+    },
+    {
+      "id": "sharpness",
+      "name": "Sharpness",
+      "weight": 5,
+      "description": "Variance of the Laplacian on a grid of tiles, averaged over the sharpest share of tiles so a plain background is not penalised. Zero at zeroBelow, full marks from fullAbove, on a log scale in between.",
+      "params": { "tileGrid": 8, "topTileShare": 0.10, "zeroBelow": 20, "fullAbove": 200 }
+    },
+    {
+      "id": "cast",
+      "name": "Colour cast",
+      "weight": 5,
+      "description": "Tint of the plain background, as distance from grey in CIELAB a*/b*. Reads only a band around the photo's edges (borderShare of each side), and within it the least saturated share of light pixels, so skin tone and clothing do not drive the result. Not measured when the edges hold nothing close enough to grey.",
+      "params": {
+        "borderShare": 0.12,
+        "neutralShare": 0.50,
+        "minLightness": 50,
+        "maxLightness": 95,
+        "maxNeutralChroma": 30,
+        "fullMax": 3,
+        "zeroAt": 12
+      }
     },
     {
       "id": "meas",

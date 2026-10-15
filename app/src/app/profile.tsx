@@ -3,7 +3,7 @@ import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
-import { measureLuminance } from '@/photo/luminance';
+import { measurePhoto } from '@/photo/measure';
 import { slotCopy } from '@/scoring/photo-slots';
 import { measurementFields, requiredPhotos } from '@/scoring/rubric';
 import { useSubmission } from '@/state/submission';
@@ -28,8 +28,8 @@ export default function Profile() {
     const asset = result.assets[0];
     try {
       if (!asset.width || !asset.height) throw new Error('no size');
-      const luminance = await measureLuminance(asset.uri);
-      s.setPhoto(slot, { uri: asset.uri, shortSidePx: Math.min(asset.width, asset.height), luminance });
+      const analysis = await measurePhoto(asset.uri);
+      s.setPhoto(slot, { uri: asset.uri, shortSidePx: Math.min(asset.width, asset.height), analysis });
     } catch {
       setError("We couldn't read that file. Use a JPG or PNG photo.");
     }

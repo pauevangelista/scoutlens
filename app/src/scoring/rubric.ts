@@ -11,23 +11,37 @@ export type MeasurementField = {
 
 export type SetParams = { required: string[] };
 export type ResParams = { targetShortSidePx: number };
-export type LightParams = { fullMin: number; fullMax: number; zeroLow: number; zeroHigh: number };
+export type ClipParams = { clipLevel: number; fullMax: number; zeroAt: number };
+export type SharpnessParams = { tileGrid: number; topTileShare: number; zeroBelow: number; fullAbove: number };
+export type CastParams = {
+  borderShare: number;
+  neutralShare: number;
+  minLightness: number;
+  maxLightness: number;
+  maxNeutralChroma: number;
+  fullMax: number;
+  zeroAt: number;
+};
 export type MeasParams = { fields: MeasurementField[] };
 
 export type Criterion =
   | { id: 'set'; name: string; weight: number; description: string; params: SetParams }
   | { id: 'res'; name: string; weight: number; description: string; params: ResParams }
-  | { id: 'light'; name: string; weight: number; description: string; params: LightParams }
+  | { id: 'highlights'; name: string; weight: number; description: string; params: ClipParams }
+  | { id: 'shadows'; name: string; weight: number; description: string; params: ClipParams }
+  | { id: 'sharpness'; name: string; weight: number; description: string; params: SharpnessParams }
+  | { id: 'cast'; name: string; weight: number; description: string; params: CastParams }
   | { id: 'meas'; name: string; weight: number; description: string; params: MeasParams };
 
 export type Rubric = {
   version: string;
   status: string;
   note: string;
+  analysis: { shortSidePx: number };
   criteria: Criterion[];
 };
 
-const KNOWN_IDS = ['set', 'res', 'light', 'meas'];
+const KNOWN_IDS = ['set', 'res', 'highlights', 'shadows', 'sharpness', 'cast', 'meas'];
 
 function check(rubric: Rubric): Rubric {
   if (!Array.isArray(rubric.criteria) || rubric.criteria.length === 0) {
@@ -46,7 +60,7 @@ function check(rubric: Rubric): Rubric {
 
 export const rubric: Rubric = check(rawRubric as Rubric);
 
-function criterion<T extends Criterion['id']>(id: T): Extract<Criterion, { id: T }> | undefined {
+export function criterion<T extends Criterion['id']>(id: T): Extract<Criterion, { id: T }> | undefined {
   return rubric.criteria.find((c) => c.id === id) as Extract<Criterion, { id: T }> | undefined;
 }
 
