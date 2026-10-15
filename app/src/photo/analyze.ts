@@ -1,5 +1,5 @@
 // Pure pixel analysis for the lighting criteria. No browser or native APIs here, so it can be tested on raw arrays.
-// Nothing here measures how bright a face or a person is: only clipping, edge strength and the tint of neutral areas.
+// Nothing here measures how bright a face or a person is: only clipping, edge sharpness (independent of contrast) and the tint of neutral areas.
 import type { CastParams, ClipParams, SharpnessParams } from '@/scoring/rubric';
 
 export type Cast = {
@@ -16,7 +16,7 @@ export type PhotoAnalysis = {
   highlightShare: number | null;
   /** Share of pixels clipped to black, 0 to 1. */
   shadowShare: number | null;
-  /** Mean Laplacian variance of the sharpest tiles. */
+  /** Edge sharpness of the strongest-edged tiles, independent of edge contrast. Higher is sharper; 0 when there are no edges. */
   sharpness: number | null;
   /** Tint of neutral areas, or 'no-neutral' when no area is close enough to grey to judge. */
   cast: Cast | 'no-neutral' | null;
@@ -44,40 +44,75 @@ export function analyzePixels(rgba: Uint8ClampedArray, width: number, height: nu
   return {
     highlightShare: params.highlights ? highlights / n : null,
     shadowShare: params.shadows ? shadows / n : null,
-    sharpness: params.sharpness ? tiledLaplacianVariance(rgba, width, height, params.sharpness) : null,
+    sharpness: params.sharpness ? tiledEdgeSharpness(rgba, width, height, params.sharpness) : null,
     cast: params.cast ? neutralCast(rgba, width, height, params.cast) : null,
   };
 }
 
-function tiledLaplacianVariance(rgba: Uint8ClampedArray, width: number, height: number, p: SharpnessParams): number {
+/**
+ * Edge sharpness that does not depend on edge contrast: per tile, the energy of the Laplacian divided by the energy
+ * of the gradient. Both grow with the square of the contrast, so it cancels, and what is left depends only on the
+ * edge profile: about 0.67 for an ideal step, 0.3 for a Gaussian blur of 1 pixel, 0.1 for 2 pixels. A light
+ * [1 2 1] blur first keeps 8-bit rounding on faint edges from looking like detail. Tiles are ranked by gradient
+ * energy only to choose which edges to judge (the strongest share), and their sums are pooled.
+ */
+/** In-place [1 2 1] / 4 blur along rows, then columns. Edges of the image are left as they are. */
+function smooth121(a: Float32Array, width: number, height: number): void {
+  const row = new Float32Array(Math.max(width, height));
+  for (let y = 0; y < height; y++) {
+    for (let x = 1; x < width - 1; x++) row[x] = (a[y * width + x - 1] + 2 * a[y * width + x] + a[y * width + x + 1]) / 4;
+    for (let x = 1; x < width - 1; x++) a[y * width + x] = row[x];
+  }
+  for (let x = 0; x < width; x++) {
+    for (let y = 1; y < height - 1; y++) row[y] = (a[(y - 1) * width + x] + 2 * a[y * width + x] + a[(y + 1) * width + x]) / 4;
+    for (let y = 1; y < height - 1; y++) a[y * width + x] = row[y];
+  }
+}
+
+function tiledEdgeSharpness(rgba: Uint8ClampedArray, width: number, height: number, p: SharpnessParams): number {
   const gray = new Float32Array(width * height);
   for (let i = 0, j = 0; j < gray.length; i += 4, j++) {
     gray[j] = 0.299 * rgba[i] + 0.587 * rgba[i + 1] + 0.114 * rgba[i + 2];
   }
+  smooth121(gray, width, height);
   const grid = p.tileGrid;
-  const sums = new Float64Array(grid * grid);
-  const sq = new Float64Array(grid * grid);
+  const lapSq = new Float64Array(grid * grid);
+  const gradSq = new Float64Array(grid * grid);
   const counts = new Uint32Array(grid * grid);
   for (let y = 1; y < height - 1; y++) {
     const ty = Math.min(grid - 1, Math.floor((y * grid) / height));
     for (let x = 1; x < width - 1; x++) {
       const i = y * width + x;
       const lap = 4 * gray[i] - gray[i - 1] - gray[i + 1] - gray[i - width] - gray[i + width];
+      const gx = gray[i + 1] - gray[i];
+      const gy = gray[i + width] - gray[i];
       const t = ty * grid + Math.min(grid - 1, Math.floor((x * grid) / width));
-      sums[t] += lap;
-      sq[t] += lap * lap;
+      lapSq[t] += lap * lap;
+      gradSq[t] += gx * gx + gy * gy;
       counts[t]++;
     }
   }
-  const variances: number[] = [];
-  for (let t = 0; t < grid * grid; t++) {
-    if (counts[t] === 0) continue;
-    const mean = sums[t] / counts[t];
-    variances.push(sq[t] / counts[t] - mean * mean);
-  }
-  variances.sort((a, b) => b - a);
-  const top = variances.slice(0, Math.max(1, Math.ceil(variances.length * p.topTileShare)));
-  return top.reduce((a, b) => a + b, 0) / top.length;
+  const order = Array.from(gradSq.keys())
+    .filter((t) => counts[t] > 0)
+    .sort((a, b) => gradSq[b] / counts[b] - gradSq[a] / counts[a]);
+  if (!order.length) return 0;
+  // Noise adds the same energy everywhere and would make faint edges look sharp. Estimate it per pixel from the
+  // flattest share of tiles (the plain background in the standard shots) and take it off before dividing.
+  const pool = (tiles: number[]) => {
+    let l = 0, g = 0, n = 0;
+    for (const t of tiles) {
+      l += lapSq[t];
+      g += gradSq[t];
+      n += counts[t];
+    }
+    return { l, g, n };
+  };
+  const take = Math.max(1, Math.ceil(order.length * p.topTileShare));
+  const noise = pool(order.slice(-Math.max(1, Math.ceil(order.length * p.noiseTileShare))));
+  const top = pool(order.slice(0, take));
+  const lap = top.l - (top.n * noise.l) / noise.n;
+  const grad = top.g - (top.n * noise.g) / noise.n;
+  return grad > 0 ? Math.max(0, lap) / grad : 0;
 }
 
 const LINEAR = Array.from({ length: 256 }, (_, v) => {

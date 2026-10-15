@@ -167,7 +167,7 @@ function scoreClipping(
   };
 }
 
-/** 0 at zeroBelow, 100 from fullAbove, interpolated on a log scale because edge strength spans orders of magnitude. */
+/** 0 at zeroBelow, 100 from fullAbove, interpolated on a log scale because edge sharpness falls off steeply with blur. */
 function sharpnessScore(v: number, p: SharpnessParams): number {
   if (v <= p.zeroBelow) return 0;
   if (v >= p.fullAbove) return 100;
@@ -180,11 +180,11 @@ function scoreSharpness(params: SharpnessParams, input: ScoringInput): Criterion
   if (!values.length) return notMeasuredOnDevice('sharpness');
 
   const score = Math.round(mean(values.map((v) => sharpnessScore(v.value, params))));
-  const avg = Math.round(mean(values.map((v) => v.value)));
+  const avg = mean(values.map((v) => v.value));
   const word = score >= 100 ? 'sharp' : score >= 50 ? 'slightly soft' : 'blurry';
   const worst = values.reduce((w, v) => (v.value < w.value ? v : w));
   const parts = [
-    `The sharpest parts of your photos reach an edge strength of ${avg.toLocaleString('en')} on average. We look for ${params.fullAbove} or more, so they look ${word}.`,
+    `The sharpest edges in your photos reach an edge sharpness of ${avg.toFixed(2)} on average. We look for ${params.fullAbove.toFixed(2)} or more, so they look ${word}.`,
   ];
   if (values.length > 1 && score < 100) parts.push(`Your ${photoName(worst.slot)} photo is the least sharp.`);
   return {

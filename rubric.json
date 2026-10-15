@@ -57,8 +57,8 @@
       "guide": "camera",
       "name": "Sharpness",
       "weight": 5,
-      "description": "Variance of the Laplacian on a grid of tiles, averaged over the sharpest share of tiles so a plain background is not penalised. Zero at zeroBelow, full marks from fullAbove, on a log scale in between.",
-      "params": { "tileGrid": 8, "topTileShare": 0.10, "zeroBelow": 20, "fullAbove": 200 }
+      "description": "Contrast-independent edge sharpness: after a light [1 2 1] blur, Laplacian energy divided by gradient energy, pooled over the topTileShare of tiles with the most edge energy, after subtracting the noise level read from the flattest noiseTileShare of tiles. Edge contrast cancels out, so a face edge against the wall gives the same value for every skin tone. About 0.67 for an ideal step, 0.3 for a 1-pixel Gaussian blur and 0.1 for 2 pixels at the analysis size. Zero at zeroBelow, full marks from fullAbove, on a log scale in between. Calibrated on synthetic images only; see docs/sharpness-contrast.md.",
+      "params": { "tileGrid": 8, "topTileShare": 0.10, "noiseTileShare": 0.25, "zeroBelow": 0.05, "fullAbove": 0.40 }
     },
     {
       "id": "cast",

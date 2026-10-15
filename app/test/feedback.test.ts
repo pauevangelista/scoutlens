@@ -9,7 +9,7 @@ import { GUIDE_IDS } from '@/feedback/guide';
 import type { PhotoAnalysis } from '@/photo/analyze';
 import { experienceLevels, measurementFields, requiredPhotos, rubric } from '@/scoring/rubric';
 
-const GOOD: PhotoAnalysis = { highlightShare: 0, shadowShare: 0, sharpness: 1000, cast: { a: 0, b: 0, chroma: 0 } };
+const GOOD: PhotoAnalysis = { highlightShare: 0, shadowShare: 0, sharpness: 0.6, cast: { a: 0, b: 0, chroma: 0 } };
 const all = (shortSidePx: number, analysis: PhotoAnalysis | null): PhotoInput =>
   Object.fromEntries(requiredPhotos.map((id) => [id, { shortSidePx, analysis }]));
 const QUALITY = ['res', 'highlights', 'shadows', 'sharpness', 'cast'];
@@ -26,7 +26,7 @@ const INPUTS: Record<string, { photos: PhotoInput; card: ModelCard }> = {
   complete: { photos: all(2000, GOOD), card: validCard() },
   'not measured': { photos: all(2000, null), card: validCard() },
   'poor lighting': {
-    photos: all(600, { highlightShare: 0.2, shadowShare: 0.05, sharpness: 30, cast: { a: 1, b: 9, chroma: Math.hypot(1, 9) } }),
+    photos: all(600, { highlightShare: 0.2, shadowShare: 0.05, sharpness: 0.1, cast: { a: 1, b: 9, chroma: Math.hypot(1, 9) } }),
     card: { ...validCard(), measurements: { waist: '6000' }, age: '16' },
   },
 };

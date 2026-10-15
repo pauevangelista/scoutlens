@@ -12,7 +12,13 @@ export type MeasurementField = {
 export type SetParams = { required: string[] };
 export type ResParams = { targetShortSidePx: number };
 export type ClipParams = { clipLevel: number; fullMax: number; zeroAt: number };
-export type SharpnessParams = { tileGrid: number; topTileShare: number; zeroBelow: number; fullAbove: number };
+export type SharpnessParams = {
+  tileGrid: number;
+  topTileShare: number;
+  noiseTileShare: number;
+  zeroBelow: number;
+  fullAbove: number;
+};
 export type CastParams = {
   borderShare: number;
   neutralShare: number;

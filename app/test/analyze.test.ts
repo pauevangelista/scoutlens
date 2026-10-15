@@ -77,7 +77,16 @@ describe('sharpness', () => {
     assert.ok(a >= sharpness.fullAbove, `crisp edge ${a} should reach full marks (${sharpness.fullAbove})`);
   });
 
-  test('a flat image has zero edge strength', () => {
+  test('edge contrast does not change the value', () => {
+    const step = (lo: number, hi: number) => image(W, H, (x) => (x < W / 2 ? [lo, lo, lo] : [hi, hi, hi]));
+    const strong = analyzePixels(step(50, 200), W, H, { sharpness }).sharpness!;
+    for (const [lo, hi] of [[190, 200], [120, 140], [10, 40], [200, 238]]) {
+      const v = analyzePixels(step(lo, hi), W, H, { sharpness }).sharpness!;
+      assert.ok(Math.abs(v - strong) < 1e-6, `edge ${lo} to ${hi}: ${v} vs ${strong}`);
+    }
+  });
+
+  test('a flat image has zero edge sharpness', () => {
     assert.equal(analyzePixels(solid(W, H, [128, 128, 128]), W, H, { sharpness }).sharpness, 0);
   });
 });

@@ -13,7 +13,7 @@ const LIGHTING = ['highlights', 'shadows', 'sharpness', 'cast'];
 const GOOD_ANALYSIS: PhotoAnalysis = {
   highlightShare: 0,
   shadowShare: 0,
-  sharpness: 1000,
+  sharpness: 0.6,
   cast: { a: 0, b: 0, chroma: 0 },
 };
 
@@ -35,7 +35,7 @@ const INPUTS: Record<string, ScoringInput> = {
   complete: input(GOOD_ANALYSIS),
   'not measured on this device': input(null),
   'one small photo': { photos: { [requiredPhotos[0]]: { shortSidePx: 300, analysis: null } }, measurements: {} },
-  'poor lighting': input({ highlightShare: 0.2, shadowShare: 0.05, sharpness: 30, cast: { a: 1, b: 9, chroma: Math.hypot(1, 9) } }),
+  'poor lighting': input({ highlightShare: 0.2, shadowShare: 0.05, sharpness: 0.1, cast: { a: 1, b: 9, chroma: Math.hypot(1, 9) } }),
   'no neutral area': input({ ...GOOD_ANALYSIS, cast: 'no-neutral' }),
   'typo in measurements': { ...input(GOOD_ANALYSIS), measurements: { ...validMeasurements(), waist: '6000' } },
 };

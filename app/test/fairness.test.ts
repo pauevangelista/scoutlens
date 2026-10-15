@@ -10,7 +10,7 @@ import { buildFeedback, photoFeedback, type ModelCard, type PhotoInput } from '@
 import { analyzePixels, type PhotoAnalysis } from '@/photo/analyze';
 import { criterion, experienceLevels, measurementFields, requiredPhotos } from '@/scoring/rubric';
 
-const GOOD: PhotoAnalysis = { highlightShare: 0, shadowShare: 0, sharpness: 1000, cast: { a: 0, b: 0, chroma: 0 } };
+const GOOD: PhotoAnalysis = { highlightShare: 0, shadowShare: 0, sharpness: 0.6, cast: { a: 0, b: 0, chroma: 0 } };
 const all = (shortSidePx: number, analysis: PhotoAnalysis | null): PhotoInput =>
   Object.fromEntries(requiredPhotos.map((id) => [id, { shortSidePx, analysis }]));
 
@@ -19,7 +19,7 @@ const PHOTO_INPUTS: Record<string, PhotoInput> = {
   complete: all(2000, GOOD),
   'one photo': { [requiredPhotos[0]]: { shortSidePx: 800, analysis: GOOD } },
   'not measured on this device': all(2000, null),
-  'poor lighting': all(900, { highlightShare: 0.2, shadowShare: 0.05, sharpness: 30, cast: { a: 1, b: 9, chroma: Math.hypot(1, 9) } }),
+  'poor lighting': all(900, { highlightShare: 0.2, shadowShare: 0.05, sharpness: 0.1, cast: { a: 1, b: 9, chroma: Math.hypot(1, 9) } }),
   'no neutral area': all(2000, { ...GOOD, cast: 'no-neutral' }),
 };
 
@@ -112,18 +112,44 @@ describe('photo feedback is the same across skin tones', () => {
     for (const skin of MONK) assert.deepEqual(pick(statuses(skin, false)), baseline, `skin rgb(${skin.join(',')})`);
   });
 
-  // KNOWN ISSUE, left visible on purpose: sharpness is the variance of the Laplacian, which grows with contrast.
-  // On a plain photo where the face edge against a light wall is the only detail, lighter skin gives a lower
-  // value than darker skin and gets "Improve" for the same focus. Real photos usually have hair, eyes and
-  // clothing edges, but this needs a decision (for example normalising by local contrast) and checking on
-  // consented real photos. Marked todo so it runs and reports without failing the suite.
-  test(
-    'sharpness status is the same for all 10 Monk tones on a plain photo',
-    { todo: 'sharpness depends on face-to-background contrast; see comment' },
-    () => {
-      const pick = (s: string[]) => s.filter((x) => x.startsWith('sharpness:'));
-      const baseline = pick(statuses(MONK[0], false));
-      for (const skin of MONK) assert.deepEqual(pick(statuses(skin, false)), baseline, `skin rgb(${skin.join(',')})`);
-    },
-  );
+  /** Box blur of the given radius along rows and columns, rounded back to 8 bits like a real photo. */
+  function blurred(rgba: Uint8ClampedArray, r: number): Uint8ClampedArray {
+    const pass = (src: Uint8ClampedArray, dx: number, dy: number) => {
+      const dst = new Uint8ClampedArray(src.length);
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          for (let c = 0; c < 4; c++) {
+            let s = 0;
+            for (let d = -r; d <= r; d++) {
+              const xx = Math.min(W - 1, Math.max(0, x + d * dx));
+              const yy = Math.min(H - 1, Math.max(0, y + d * dy));
+              s += src[(yy * W + xx) * 4 + c];
+            }
+            dst[(y * W + x) * 4 + c] = Math.round(s / (2 * r + 1));
+          }
+        }
+      }
+      return dst;
+    };
+    return r === 0 ? rgba : pass(pass(rgba, 1, 0), 0, 1);
+  }
+
+  // Sharpness is Laplacian energy over gradient energy, so face-to-wall contrast cancels out. With raw Laplacian
+  // variance, light skin on a light wall used to get "Improve" where dark skin got "Good" at the same focus.
+  for (const r of [0, 1, 2, 4]) {
+    test(`sharpness status is the same for all 10 Monk tones on a plain photo (blur radius ${r})`, () => {
+      const sharp = (skin: [number, number, number]) => {
+        const a = analyzePixels(blurred(photo(skin, false), r), W, H, params);
+        const status = photoFeedback(all(2000, a)).find((c) => c.id === 'sharpness')!.status;
+        return { status, value: a.sharpness! };
+      };
+      const baseline = sharp(MONK[0]);
+      if (r === 0) assert.equal(baseline.status, 'good');
+      if (r === 4) assert.equal(baseline.status, 'improve');
+      for (const skin of MONK) {
+        const s = sharp(skin);
+        assert.equal(s.status, baseline.status, `skin rgb(${skin.join(',')}): ${s.value} vs ${baseline.value}`);
+      }
+    });
+  }
 });
