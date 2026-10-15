@@ -76,7 +76,7 @@ describe('scoreSubmission', () => {
       assert.equal(c.score, null, id);
       assert.equal(c.points, null, id);
       assert.equal(c.ok, false, id);
-      assert.match(c.reason, /not counted in your total/, id);
+      assert.match(c.reason, /can't measure/, id);
     }
     const measuredWeight = rubric.criteria.filter((c) => !LIGHTING.includes(c.id)).reduce((s, c) => s + c.weight, 0);
     assert.equal(report.countedWeight, measuredWeight);

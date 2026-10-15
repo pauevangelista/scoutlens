@@ -1,4 +1,6 @@
 // Scoring functions, one per rubric criterion id. Weights and thresholds come from the rubric.
+// Scores are internal: they feed the analysis and the statuses in feedback.ts, and are never shown to users,
+// so reasons and tips describe the measurement and the target, not points.
 // Group attributes (gender, age band) are deliberately not part of ScoringInput.
 import type { Cast, PhotoAnalysis } from '@/photo/analyze';
 
@@ -56,8 +58,8 @@ export type ScoreReport = {
 const NOTHING_TO_CHANGE = 'Nothing to change.';
 const NO_PHOTOS: CriterionResult = {
   score: 0,
-  reason: 'There are no photos to measure.',
-  tip: 'Add at least one photo.',
+  reason: 'There are no photos to check yet.',
+  tip: 'Add your photos first.',
   ok: false,
 };
 
@@ -77,8 +79,8 @@ function photoName(slot: string): string {
 function notMeasuredOnDevice(what: string): CriterionResult {
   return {
     score: null,
-    reason: `This device can't measure ${what} yet, so it is not counted in your total.`,
-    tip: 'Use the web version of ScoutLens to get this score.',
+    reason: `This device can't measure ${what} yet.`,
+    tip: 'Open ScoutLens in a web browser to check this.',
     ok: false,
   };
 }
@@ -129,7 +131,7 @@ function scoreRes(params: ResParams, input: ScoringInput): CriterionResult {
   const avg = Math.round(mean(sides));
   return {
     score,
-    reason: `The shorter side of your photos averages ${avg.toLocaleString('en')} px. Full marks start at ${target.toLocaleString('en')} px.`,
+    reason: `The shorter side of your photos averages ${avg.toLocaleString('en')} px. We look for at least ${target.toLocaleString('en')} px so agencies can see detail.`,
     tip: score >= 100 ? NOTHING_TO_CHANGE : 'Use the original file from your camera, not a screenshot or a messaging-app copy.',
     ok: score >= 100,
   };
@@ -150,7 +152,7 @@ function scoreClipping(
   const worst = values.reduce((w, v) => (v.value > w.value ? v : w));
   const what = kind === 'highlights' ? 'blown out to pure white' : 'crushed to pure black';
   const parts = [
-    `On average ${percent(mean(values.map((v) => v.value)))} of each photo is ${what}. Up to ${percent(params.fullMax)} gets full marks.`,
+    `On average ${percent(mean(values.map((v) => v.value)))} of each photo is ${what}. We look for ${percent(params.fullMax)} or less.`,
   ];
   if (values.length > 1 && score < 100) parts.push(`Your ${photoName(worst.slot)} photo has the most (${percent(worst.value)}).`);
   const fix =
@@ -182,7 +184,7 @@ function scoreSharpness(params: SharpnessParams, input: ScoringInput): Criterion
   const word = score >= 100 ? 'sharp' : score >= 50 ? 'slightly soft' : 'blurry';
   const worst = values.reduce((w, v) => (v.value < w.value ? v : w));
   const parts = [
-    `The sharpest parts of your photos reach an edge strength of ${avg.toLocaleString('en')} on average. Full marks start at ${params.fullAbove}, so they look ${word}.`,
+    `The sharpest parts of your photos reach an edge strength of ${avg.toLocaleString('en')} on average. We look for ${params.fullAbove} or more, so they look ${word}.`,
   ];
   if (values.length > 1 && score < 100) parts.push(`Your ${photoName(worst.slot)} photo is the least sharp.`);
   return {
@@ -219,7 +221,7 @@ function scoreCast(params: CastParams, input: ScoringInput): CriterionResult {
     return {
       score: null,
       reason:
-        "None of your photos has a plain white or grey area to judge colour from, or the tint is too strong to tell apart from coloured surfaces. It is not counted in your total.",
+        'None of your photos has a plain white or grey area to judge colour from, or the tint is too strong to tell apart from coloured surfaces.',
       tip: 'Use a plain white or light grey background, lit by daylight.',
       ok: false,
     };

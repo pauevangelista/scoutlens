@@ -24,20 +24,34 @@ export type CastParams = {
 };
 export type MeasParams = { fields: MeasurementField[] };
 
-export type Criterion =
-  | { id: 'set'; name: string; weight: number; description: string; params: SetParams }
-  | { id: 'res'; name: string; weight: number; description: string; params: ResParams }
-  | { id: 'highlights'; name: string; weight: number; description: string; params: ClipParams }
-  | { id: 'shadows'; name: string; weight: number; description: string; params: ClipParams }
-  | { id: 'sharpness'; name: string; weight: number; description: string; params: SharpnessParams }
-  | { id: 'cast'; name: string; weight: number; description: string; params: CastParams }
-  | { id: 'meas'; name: string; weight: number; description: string; params: MeasParams };
+/** Shared fields. `guide` is the section of the "How to take digitals" guide that the tip links to. */
+type Base = { name: string; weight: number; description: string; guide: string };
+
+export type Criterion = Base &
+  (
+    | { id: 'set'; params: SetParams }
+    | { id: 'res'; params: ResParams }
+    | { id: 'highlights'; params: ClipParams }
+    | { id: 'shadows'; params: ClipParams }
+    | { id: 'sharpness'; params: SharpnessParams }
+    | { id: 'cast'; params: CastParams }
+    | { id: 'meas'; params: MeasParams }
+  );
+
+export type ExperienceLevel = { id: string; label: string };
 
 export type Rubric = {
   version: string;
   status: string;
   note: string;
   analysis: { shortSidePx: number };
+  /** How internal scores become the statuses users see. */
+  feedback: { goodFrom: number };
+  /** Model card fields that are not measurements. Weight and BMI are deliberately absent. */
+  modelCard: {
+    age: { label: string; min: number; max: number; unit: string };
+    experienceLevels: ExperienceLevel[];
+  };
   criteria: Criterion[];
 };
 
@@ -54,7 +68,10 @@ function check(rubric: Rubric): Rubric {
     if (typeof c.weight !== 'number' || c.weight <= 0) {
       throw new Error(`Criterion "${c.id}" in rubric.json needs a positive weight.`);
     }
+    if (!c.guide) throw new Error(`Criterion "${c.id}" in rubric.json needs a guide section for its tip.`);
   }
+  if (typeof rubric.feedback?.goodFrom !== 'number') throw new Error('rubric.json needs feedback.goodFrom.');
+  if (!rubric.modelCard?.experienceLevels?.length) throw new Error('rubric.json needs modelCard.experienceLevels.');
   return rubric;
 }
 
@@ -69,3 +86,6 @@ export const requiredPhotos: string[] = criterion('set')?.params.required ?? [];
 
 /** Measurement fields the profile screen shows. */
 export const measurementFields: MeasurementField[] = criterion('meas')?.params.fields ?? [];
+
+/** Experience levels the model card offers, in rubric order. */
+export const experienceLevels: ExperienceLevel[] = rubric.modelCard.experienceLevels;

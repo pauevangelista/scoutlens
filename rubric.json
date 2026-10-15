@@ -1,14 +1,28 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "provisional",
   "note": "Placeholder criteria on submission quality. Replace with scout-derived criteria after interviews. Lighting thresholds are first estimates and need calibrating.",
   "analysis": {
     "shortSidePx": 512,
     "note": "Photos are scaled to this shorter side in the browser before the lighting criteria are measured."
   },
+  "feedback": {
+    "goodFrom": 100,
+    "note": "Users never see a score. Each check shows Good when its internal score is at or above goodFrom, Improve below it, Missing when there is nothing to check, and Not measured when this device cannot measure it. Weights and scores are kept for analysis only."
+  },
+  "modelCard": {
+    "age": { "label": "Age", "min": 18, "max": 99, "unit": "years" },
+    "experienceLevels": [
+      { "id": "new", "label": "New: no shoots yet" },
+      { "id": "tests", "label": "Some test shoots" },
+      { "id": "signed", "label": "Signed with an agency before" }
+    ],
+    "note": "Weight is never collected and BMI is never computed."
+  },
   "criteria": [
     {
       "id": "set",
+      "guide": "shots",
       "name": "Photo set",
       "weight": 40,
       "description": "Share of the three standard photos provided: face close-up, full length, side profile.",
@@ -16,6 +30,7 @@
     },
     {
       "id": "res",
+      "guide": "export",
       "name": "Image resolution",
       "weight": 20,
       "description": "Shorter image side compared with a 1,200 px target, averaged over photos.",
@@ -23,6 +38,7 @@
     },
     {
       "id": "highlights",
+      "guide": "light",
       "name": "Clipped highlights",
       "weight": 5,
       "description": "Share of pixels blown out to pure white (any channel at or above clipLevel). Full marks up to fullMax, zero at zeroAt.",
@@ -30,6 +46,7 @@
     },
     {
       "id": "shadows",
+      "guide": "light",
       "name": "Clipped shadows",
       "weight": 5,
       "description": "Share of pixels crushed to pure black (every channel at or below clipLevel). Full marks up to fullMax, zero at zeroAt.",
@@ -37,6 +54,7 @@
     },
     {
       "id": "sharpness",
+      "guide": "camera",
       "name": "Sharpness",
       "weight": 5,
       "description": "Variance of the Laplacian on a grid of tiles, averaged over the sharpest share of tiles so a plain background is not penalised. Zero at zeroBelow, full marks from fullAbove, on a log scale in between.",
@@ -44,6 +62,7 @@
     },
     {
       "id": "cast",
+      "guide": "light",
       "name": "Colour cast",
       "weight": 5,
       "description": "Tint of the plain background, as distance from grey in CIELAB a*/b*. Reads only a band around the photo's edges (borderShare of each side), and within it the least saturated share of light pixels, so skin tone and clothing do not drive the result. Not measured when the edges hold nothing close enough to grey.",
@@ -59,6 +78,7 @@
     },
     {
       "id": "meas",
+      "guide": "measuring",
       "name": "Measurements",
       "weight": 20,
       "description": "Share of measurements provided in a realistic range. Completeness only; size is never scored.",
