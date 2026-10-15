@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ScoutLens your digitals</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #2B50FF;outline-offset:2px}
+</style>
+</helmet>
+<div id="top" style="width:390px;height:960px;box-sizing:border-box;background:#F3F4F7;color:#0F1115;font-family:'Hanken Grotesk','Helvetica Neue',system-ui,sans-serif;padding:20px 24px 28px;display:flex;flex-direction:column">
+
+  <div style="display:flex;align-items:center;gap:14px">
+    <a href="Details.dc.html" aria-label="Back" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #DADDE5;border-radius:999px;background:#FFFFFF;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1115" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 L8 12 L15 19"/></svg></a>
+    <div style="flex:1;height:4px;border-radius:2px;background:#DADDE5"><div style="width:100%;height:100%;border-radius:2px;background:#2B50FF"></div></div>
+    <div style="font-size:13px;color:#5A6070;font-weight:500">5 of 5</div>
+  </div>
+
+  <h1 style="margin:40px 0 0;font-size:38px;font-weight:800;line-height:1.04;letter-spacing:-0.035em">Your digitals</h1>
+  <p style="margin:12px 0 0;font-size:17px;line-height:1.5;color:#5A6070">Natural light, a plain wall, no filters. Wear the same simple outfit in all three.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:26px">
+    <div>
+      <div style="position:relative;aspect-ratio:3/4;background:#D5D9E3;border-radius:18px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden">
+        <svg width="92" height="120" viewBox="0 0 100 130" aria-hidden="true"><circle cx="50" cy="48" r="20" fill="#0F1115" fill-opacity="0.18"/><path d="M12 130 C14 92 32 80 50 80 C68 80 86 92 88 130 Z" fill="#0F1115" fill-opacity="0.18"/></svg>
+        <div style="position:absolute;inset:8px;pointer-events:none;background:linear-gradient(#0F1115,#0F1115) top left / 12px 1.5px no-repeat,linear-gradient(#0F1115,#0F1115) top left / 1.5px 12px no-repeat,linear-gradient(#0F1115,#0F1115) top right / 12px 1.5px no-repeat,linear-gradient(#0F1115,#0F1115) top right / 1.5px 12px no-repeat,linear-gradient(#0F1115,#0F1115) bottom left / 12px 1.5px no-repeat,linear-gradient(#0F1115,#0F1115) bottom left / 1.5px 12px no-repeat,linear-gradient(#0F1115,#0F1115) bottom right / 12px 1.5px no-repeat,linear-gradient(#0F1115,#0F1115) bottom right / 1.5px 12px no-repeat"></div>
+      </div>
+      <div style="margin-top:8px;font-size:14px;font-weight:600;line-height:1.3">Face close-up</div>
+      <div style="margin-top:2px;font-size:13px;color:#5A6070;line-height:1.35">Added</div>
+    </div>
+    <div>
+      <button type="button" aria-label="Add full length photo" style="width:100%;aspect-ratio:3/4;background:#FFFFFF;border:1.5px dashed #A9AFBF;border-radius:18px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:#0F1115;font-family:inherit">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2B50FF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span style="font-size:13px;font-weight:600">Add photo</span>
+      </button>
+      <div style="margin-top:8px;font-size:14px;font-weight:600;line-height:1.3">Full length</div>
+      <div style="margin-top:2px;font-size:13px;color:#5A6070;line-height:1.35">Head to toe</div>
+    </div>
+    <div>
+      <button type="button" aria-label="Add side profile photo" style="width:100%;aspect-ratio:3/4;background:#FFFFFF;border:1.5px dashed #A9AFBF;border-radius:18px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:#0F1115;font-family:inherit">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2B50FF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span style="font-size:13px;font-weight:600">Add photo</span>
+      </button>
+      <div style="margin-top:8px;font-size:14px;font-weight:600;line-height:1.3">Side profile</div>
+      <div style="margin-top:2px;font-size:13px;color:#5A6070;line-height:1.35">Turn 90 degrees</div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;padding:18px 20px;border-radius:24px;background:#E7EAF3;font-size:15px;line-height:1.5">
+    <strong style="font-weight:600">Not sure how to shoot these?</strong> Stand a step away from a plain wall, face a window, and ask a friend to hold the phone at chest height.
+    <a href="#top" style="display:inline-block;margin-top:8px;color:#2B50FF;font-weight:600;text-decoration:underline;text-underline-offset:4px">Read the digitals guide</a>
+  </div>
+
+  <div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-radius:24px;background:#FFFFFF;border:1px solid #DADDE5">
+    <div style="font-size:15px;line-height:1.4"><strong style="font-weight:600">Help check ScoutLens is fair</strong><br><span style="color:#5A6070">Optional. Never changes your feedback.</span></div>
+    <button type="button" style="flex:none;min-height:44px;padding:0 18px;border:1px solid #0F1115;border-radius:999px;background:#FFFFFF;color:#0F1115;font:inherit;font-size:15px;font-weight:600;cursor:pointer">Answer</button>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <a href="Building.dc.html" style="display:flex;align-items:center;justify-content:center;height:56px;margin-top:28px;border-radius:999px;background:#2B50FF;color:#FFFFFF;font-size:17px;font-weight:600">Get my notes</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

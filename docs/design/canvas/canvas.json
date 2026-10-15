@@ -1,0 +1,26 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-15T15:20:00Z" },
+  "title": "ScoutLens app design",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 Welcome", "is_interactive": true },
+    "How1.dc.html": { "x": 470, "y": 0, "w": 390, "h": 844, "title": "2 Scouts told us", "is_interactive": true },
+    "How2.dc.html": { "x": 940, "y": 0, "w": 390, "h": 844, "title": "3 Notes, not a score", "is_interactive": true },
+    "How3.dc.html": { "x": 1410, "y": 0, "w": 390, "h": 844, "title": "4 Where to apply", "is_interactive": true },
+    "Consent.dc.html": { "x": 1880, "y": 0, "w": 390, "h": 844, "title": "5 Consent", "is_interactive": true },
+    "Goal.dc.html": { "x": 2350, "y": 0, "w": 390, "h": 844, "title": "6 Your aim", "is_interactive": true },
+    "Experience.dc.html": { "x": 0, "y": 964, "w": 390, "h": 844, "title": "7 Experience", "is_interactive": true },
+    "Details.dc.html": { "x": 470, "y": 964, "w": 390, "h": 900, "title": "8 Your details", "is_interactive": true },
+    "Digitals.dc.html": { "x": 940, "y": 964, "w": 390, "h": 960, "title": "9 Your digitals", "is_interactive": true },
+    "Building.dc.html": { "x": 1410, "y": 964, "w": 390, "h": 844, "title": "10 Reading your photos", "is_interactive": true },
+    "Notes.dc.html": { "x": 1880, "y": 964, "w": 390, "h": 1700, "title": "11 Your notes", "is_interactive": true },
+    "Agencies.dc.html": { "x": 2350, "y": 964, "w": 390, "h": 1400, "title": "12 Where to look", "is_interactive": true }
+  },
+  "order": ["Main.dc.html", "How1.dc.html", "How2.dc.html", "How3.dc.html", "Consent.dc.html", "Goal.dc.html", "Experience.dc.html", "Details.dc.html", "Digitals.dc.html", "Building.dc.html", "Notes.dc.html", "Agencies.dc.html"],
+  "notes": {
+    "t1": { "x": 0, "y": -260, "text": "ScoutLens onboarding: from first tap to first agency", "kind": "title1", "maxW": 2740 }
+  },
+  "designSystems": []
+}
