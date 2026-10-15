@@ -1,11 +1,15 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "seed: only entries with a source found on 2026-10-15; every entry still needs a check on the agency's official page and, for requirements, confirmation by a scout",
   "rules": [
     "Only record a requirement the agency publishes itself, or one a scout confirms in writing.",
     "Height and age are the usual published requirements. Bust, waist and hips: add a range only if published or scout-confirmed, with source. Never add weight or BMI.",
     "Division is chosen by the applicant. Use the agency's own categories.",
-    "Show 'last_verified' in the app. Treat anything older than 6 months as stale."
+    "Show 'last_verified' in the app. Treat anything older than 6 months as stale.",
+    "'last_verified' is the date someone checked the record against the agency's own official page. It stays null until that happens, and the app treats null as stale. 'found_on' on a source is only the date the source was found.",
+    "Optional per division: 'measurements' with 'chest', 'waist' or 'hips' ranges ({ min_cm, max_cm, source }), only when published or confirmed in writing by a scout. The app shows them only when the user opts in, and never uses them to decide a match.",
+    "Optional per agency: 'experience' ({ accepts: [experience level ids from rubric.json], source }), only when the agency publishes it.",
+    "'past_event': true marks a dated event that may be over. It stays listed as an example of published criteria."
   ],
   "agencies": [
     {
@@ -20,8 +24,9 @@
       "age": { "min": 18, "max": null, "notes": "Represents ages 18+" },
       "how_to_apply": "Online form with several recent photos, a headshot and a full-length photo.",
       "upfront_fees": null,
+      "last_verified": null,
       "sources": [
-        { "url": "https://www.backstage.com/resources/detail/manager/elite-model-managementelite-world-group-87132/", "kind": "third_party_listing" }
+        { "url": "https://www.backstage.com/resources/detail/manager/elite-model-managementelite-world-group-87132/", "kind": "third_party_listing", "found_on": "2026-10-15" }
       ],
       "confidence": "low: third-party listing, date unknown. Check elite official site."
     },
@@ -29,6 +34,7 @@
       "id": "elite-uk-open-casting-event",
       "name": "Elite Model Management, UK open casting (event record)",
       "type": "open call (dated event, may be past)",
+      "past_event": true,
       "markets": ["united kingdom"],
       "divisions": [
         { "id": "female-presenting", "label": "Female-presenting category (female or non-binary applicants)", "min_height_cm": 168, "notes": "5'6\"" },
@@ -37,8 +43,9 @@
       "age": { "min": 14, "max": 20, "notes": "Under 18 must attend with a parent or guardian" },
       "how_to_apply": "Free; choose a time slot and apply online.",
       "upfront_fees": false,
+      "last_verified": null,
       "sources": [
-        { "url": "https://at.westfield.com/en/united-kingdom/stratfordcity/events/elite-model-management-open-casting/132631", "kind": "event_page" }
+        { "url": "https://at.westfield.com/en/united-kingdom/stratfordcity/events/elite-model-management-open-casting/132631", "kind": "event_page", "found_on": "2026-10-15" }
       ],
       "confidence": "medium for that event only. Shows that applicants choose the category, including non-binary applicants."
     },
@@ -54,8 +61,9 @@
       "age": { "min": null, "max": null, "notes": "not recorded" },
       "how_to_apply": "National rounds in each participating country.",
       "upfront_fees": null,
+      "last_verified": null,
       "sources": [
-        { "url": "https://en.wikipedia.org/wiki/Elite_Model_Look", "kind": "encyclopedia" }
+        { "url": "https://en.wikipedia.org/wiki/Elite_Model_Look", "kind": "encyclopedia", "found_on": "2026-10-15" }
       ],
       "confidence": "low: encyclopedia, rules change by year"
     },
@@ -71,8 +79,9 @@
       "age": { "min": null, "max": null, "notes": "age is asked in the application" },
       "how_to_apply": "Website form: face photo, full-body photo, Instagram link if public, age, height, location. International applicants also add portfolio, video and updated digitals.",
       "upfront_fees": null,
+      "last_verified": null,
       "sources": [
-        { "url": "https://www.que.es/2022/04/27/minoire-la-agencia-que-explica-que-hay-que-hacer-para-ser-modelo/", "kind": "press_article_2022" }
+        { "url": "https://www.que.es/2022/04/27/minoire-la-agencia-que-explica-que-hay-que-hacer-para-ser-modelo/", "kind": "press_article_2022", "found_on": "2026-10-15" }
       ],
       "confidence": "medium: press article quoting the agency, 2022. Check minoire official site."
     },
@@ -87,8 +96,9 @@
       "age": { "min": null, "max": null, "notes": "not recorded" },
       "how_to_apply": "Not recorded. Check the official site.",
       "upfront_fees": null,
+      "last_verified": null,
       "sources": [
-        { "url": "https://www.marie-claire.es/planeta-mujer/3411.html", "kind": "interview" }
+        { "url": "https://www.marie-claire.es/planeta-mujer/3411.html", "kind": "interview", "found_on": "2026-10-15" }
       ],
       "confidence": "low: an interview comment, not a published requirement"
     }
