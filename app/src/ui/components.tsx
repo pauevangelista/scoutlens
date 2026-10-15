@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, radii, space, type } from './theme';
+import { colors, radii, space, type, weight } from './theme';
 
 export type Tone = 'light' | 'dark';
 
@@ -184,7 +184,7 @@ export function TextButton({
       style={({ pressed }) => [styles.textButton, { opacity: pressed ? 0.7 : 1 }]}>
       <Text
         style={[
-          accent ? type.smallStrong : { ...type.small, fontWeight: '500' },
+          accent ? type.smallStrong : { ...type.small, ...weight('500') },
           { color: accent ? colors.cobalt : colors.muted },
           accent && styles.underline,
         ]}>
@@ -217,7 +217,7 @@ export function StepBar({ step, total = 5, onBack }: { step: number; total?: num
         style={styles.track}>
         <View style={[styles.trackFill, { width: pct }]} />
       </View>
-      <Text style={[type.fine, { color: colors.muted, fontWeight: '500' }]}>{`${step} of ${total}`}</Text>
+      <Text style={[type.fine, { color: colors.muted, ...weight('500') }]}>{`${step} of ${total}`}</Text>
     </View>
   );
 }
@@ -334,7 +334,7 @@ export function Checkbox({
       onPress={() => onChange(!checked)}
       style={styles.check}>
       <View style={[styles.box, checked ? styles.boxOn : null]}>{checked && <CheckIcon color={colors.white} size={12} />}</View>
-      <Text style={[strong ? { ...type.lede, fontWeight: '600' } : type.body, { color: colors.carbon, flex: 1 }]}>{label}</Text>
+      <Text style={[strong ? { ...type.lede, ...weight('600') } : type.body, { color: colors.carbon, flex: 1 }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -591,5 +591,5 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   ring: { width: 14, height: 14, borderRadius: 7, borderWidth: 2 },
-  placeholderCaption: { position: 'absolute', left: 16, right: 10, bottom: 14, color: colors.neutralPillText, fontWeight: '400', fontSize: 11 },
+  placeholderCaption: { position: 'absolute', left: 16, right: 10, bottom: 14, color: colors.neutralPillText, ...weight('400'), fontSize: 11 },
 });

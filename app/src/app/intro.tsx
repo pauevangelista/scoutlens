@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { BrandBar, Button, Card, Dots, Lede, Screen, Silhouette, StatusPill, TextButton, type PillKind } from '@/ui/components';
-import { colors, radii, type } from '@/ui/theme';
+import { colors, radii, type, weight } from '@/ui/theme';
 
 /** 2 to 4: three explainers with Skip and dots. Collect nothing. `?step=1..3`. */
 export default function Intro() {
@@ -46,7 +46,7 @@ function Row({ title, detail, kind, label, last, big }: {
     <View style={[styles.row, !last && styles.rowLine]}>
       <View style={styles.rowHead}>
         <View style={{ flex: big ? undefined : 1, flexShrink: 1 }}>
-          <Text style={big ? [type.option, { fontWeight: '800', letterSpacing: -0.36 }] : [type.lede, { fontWeight: '600' }]}>{title}</Text>
+          <Text style={big ? [type.option, weight('800'), { letterSpacing: -0.36 }] : [type.lede, weight('600')]}>{title}</Text>
           {!big && <Text style={[type.caption, { color: colors.muted, marginTop: 2 }]}>{detail}</Text>}
         </View>
         <StatusPill kind={kind} label={label} />

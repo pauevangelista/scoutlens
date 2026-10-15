@@ -10,7 +10,7 @@ import { parseMeasurement } from '@/scoring/score';
 import { useSubmission } from '@/state/submission';
 import { BackButton, Brand, Button, Card, Checkbox, Chip, H1, Lede, Screen, StatusPill, Tag, type PillKind } from '@/ui/components';
 import { goBack } from '@/ui/nav';
-import { colors, type } from '@/ui/theme';
+import { colors, type, weight } from '@/ui/theme';
 
 /** A typed value inside the accepted range, or null. Out-of-range values are flagged on the notes screen. */
 function validNumber(raw: string | undefined, range: { min: number; max: number } | undefined): number | null {
@@ -118,7 +118,7 @@ function ReasonLine({ r }: { r: Reason }) {
     <Text role="listitem" style={[type.body, { color: decided ? colors.carbon : colors.muted }]}>
       {lead ? (
         <>
-          <Text style={{ fontWeight: '600' }}>{lead}</Text>
+          <Text style={weight('600')}>{lead}</Text>
           {r.text.slice(lead.length)}
         </>
       ) : (
@@ -203,7 +203,7 @@ function AgencyCard({ m }: { m: OrderedMatch }) {
         <Text style={styles.strong}>How to apply.</Text> {a.how_to_apply}
       </Text>
 
-      <Text style={[type.small, { marginTop: 10 }, m.fees.warn ? { color: colors.cobalt, fontWeight: '600' } : { color: colors.muted }]}>
+      <Text style={[type.small, { marginTop: 10 }, m.fees.warn ? { color: colors.cobalt, ...weight('600') } : { color: colors.muted }]}>
         {m.fees.warn ? `Warning: ${m.fees.text}` : m.fees.text}
       </Text>
 
@@ -229,7 +229,7 @@ function AgencyCard({ m }: { m: OrderedMatch }) {
 const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   note: { color: colors.muted, marginTop: 10, lineHeight: 22 },
-  strong: { fontWeight: '600', color: colors.carbon },
+  strong: { ...weight('600'), color: colors.carbon },
   // The pill drops under a long name instead of squeezing it.
   head: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 },
   name: { flexGrow: 1, flexShrink: 1, flexBasis: 180 },

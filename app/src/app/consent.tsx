@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import { CONSENT_STATEMENTS, useSubmission } from '@/state/submission';
 import { Button, Card, Checkbox, H1, Lede, Screen, StepBar } from '@/ui/components';
 import { goBack } from '@/ui/nav';
-import { colors, type } from '@/ui/theme';
+import { colors, type, weight } from '@/ui/theme';
 
 /** 5 Consent. The gate: nothing proceeds until all three statements are ticked. */
 export default function Consent() {
@@ -25,7 +25,7 @@ export default function Consent() {
       </Card>
 
       <Text style={[type.caption, { color: colors.muted, marginTop: 20, lineHeight: 22 }]}>
-        <Text style={{ fontWeight: '600', color: colors.carbon }}>Later, one optional question.</Text> If you share your gender or age band, it is
+        <Text style={[weight('600'), { color: colors.carbon }]}>Later, one optional question.</Text> If you share your gender or age band, it is
         only used to check that ScoutLens treats everyone the same. It never changes your feedback.
       </Text>
     </Screen>

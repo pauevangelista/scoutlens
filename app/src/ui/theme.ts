@@ -1,5 +1,9 @@
 // The one place for colors, radii, type and spacing. Values come from docs/design/design-system.md.
 // Do not add colors, radii or fonts here that the design does not use.
+import { HankenGrotesk_400Regular } from '@expo-google-fonts/hanken-grotesk/400Regular';
+import { HankenGrotesk_500Medium } from '@expo-google-fonts/hanken-grotesk/500Medium';
+import { HankenGrotesk_600SemiBold } from '@expo-google-fonts/hanken-grotesk/600SemiBold';
+import { HankenGrotesk_800ExtraBold } from '@expo-google-fonts/hanken-grotesk/800ExtraBold';
 import { Platform, type TextStyle } from 'react-native';
 
 export const colors = {
@@ -37,23 +41,43 @@ export const space = {
   touch: 44,
 } as const;
 
-type Weight = '400' | '500' | '600' | '800';
+export type Weight = '400' | '500' | '600' | '800';
 
 /**
- * Hanken Grotesk, with Helvetica Neue / system-ui as the fallback. The font file is not bundled yet,
- * so native platforms use the system font until it is added.
+ * Hanken Grotesk, bundled with the app from @expo-google-fonts (no request to Google Fonts).
+ * Each weight is its own family, because native platforms do not pick a weight from one family.
+ * Loaded in the root layout with `fontFiles`.
  */
-const family = Platform.select({
-  web: "'Hanken Grotesk', 'Helvetica Neue', system-ui, sans-serif",
-  ios: 'Helvetica Neue',
-  default: undefined,
-});
+const FAMILY: Record<Weight, string> = {
+  '400': 'HankenGrotesk_400Regular',
+  '500': 'HankenGrotesk_500Medium',
+  '600': 'HankenGrotesk_600SemiBold',
+  '800': 'HankenGrotesk_800ExtraBold',
+};
 
-function font(size: number, weight: Weight, lineHeight: number, trackingEm = 0): TextStyle {
+export const fontFiles: Record<string, number> = {
+  [FAMILY['400']]: HankenGrotesk_400Regular,
+  [FAMILY['500']]: HankenGrotesk_500Medium,
+  [FAMILY['600']]: HankenGrotesk_600SemiBold,
+  [FAMILY['800']]: HankenGrotesk_800ExtraBold,
+};
+
+/** On the web the browser falls back to Helvetica Neue, then system-ui. Native falls back to the system font. */
+const FALLBACK = "'Helvetica Neue', system-ui, sans-serif";
+
+/**
+ * Font family and weight together. Use this instead of setting fontWeight on its own.
+ * Native gets the weight from the family alone: adding fontWeight there can synthesize a heavier face.
+ * The web also sets fontWeight so the fallback fonts render at the right weight.
+ */
+export function weight(w: Weight): TextStyle {
+  return Platform.OS === 'web' ? { fontFamily: `${FAMILY[w]}, ${FALLBACK}`, fontWeight: w } : { fontFamily: FAMILY[w] };
+}
+
+function font(size: number, w: Weight, lineHeight: number, trackingEm = 0): TextStyle {
   return {
-    fontFamily: family,
+    ...weight(w),
     fontSize: size,
-    fontWeight: weight,
     lineHeight: Math.round(size * lineHeight),
     letterSpacing: trackingEm ? size * trackingEm : undefined,
   };

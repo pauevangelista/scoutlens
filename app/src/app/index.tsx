@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Brand, Button, CropMarks, Lede, Screen, Silhouette } from '@/ui/components';
-import { colors, radii, type } from '@/ui/theme';
+import { colors, radii, type, weight } from '@/ui/theme';
 
 /** 1 Welcome. Collects nothing. */
 export default function Welcome() {
@@ -18,7 +18,7 @@ export default function Welcome() {
       <View style={styles.top}>
         <Brand tone="dark" large />
         <View style={styles.age}>
-          <Text style={[type.fine, { color: colors.mutedOnDark, fontWeight: '500' }]}>18+</Text>
+          <Text style={[type.fine, { color: colors.mutedOnDark, ...weight('500') }]}>18+</Text>
         </View>
       </View>
 
@@ -42,5 +42,5 @@ const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   age: { paddingVertical: 5, paddingHorizontal: 12, borderWidth: 1, borderColor: colors.neutralPillText, borderRadius: radii.pill },
   hero: { marginTop: 20, height: 408, borderRadius: radii.hero, backgroundColor: colors.carbonSurface, overflow: 'hidden' },
-  caption: { position: 'absolute', left: 28, bottom: 26, color: colors.mutedOnDark, fontWeight: '400', lineHeight: 17 },
+  caption: { position: 'absolute', left: 28, bottom: 26, color: colors.mutedOnDark, ...weight('400'), lineHeight: 17 },
 });
