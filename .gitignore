@@ -12,3 +12,5 @@ build/
 *.heic
 data/
 fixtures-real/
+# exception: Expo's placeholder app icons (no personal data)
+!app/assets/**/*.png
