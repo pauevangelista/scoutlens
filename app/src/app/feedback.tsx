@@ -1,36 +1,50 @@
-import { Redirect, router } from 'expo-router';
+import { Link, Redirect, router } from 'expo-router';
 import { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
+import { buildFeedback, STATUS_LABEL, type Check, type Status } from '@/feedback/feedback';
+import { GUIDE } from '@/feedback/guide';
 import { slotCopy } from '@/scoring/photo-slots';
 import { requiredPhotos } from '@/scoring/rubric';
-import { scoreSubmission, type ScoredCriterion } from '@/scoring/score';
 import { useSubmission } from '@/state/submission';
-import { Actions, Button, H3, Lede, Note, Screen, styles as ui } from '@/ui/components';
-import { useColors } from '@/ui/theme';
+import { Actions, Button, H2, H3, Lede, Note, Screen, styles as ui } from '@/ui/components';
+import { useColors, type Colors } from '@/ui/theme';
 
-export default function Score() {
+/** A symbol next to the word, so status never depends on colour alone. */
+const STATUS_MARK: Record<Status, string> = { good: '✓', improve: '!', missing: '○', 'not-measured': '–' };
+
+function statusColours(status: Status, c: Colors) {
+  switch (status) {
+    case 'good': return { fg: c.accent, bg: c.accentSoft };
+    case 'improve': return { fg: c.warn, bg: c.warnSoft };
+    case 'missing': return { fg: c.err, bg: c.bg };
+    case 'not-measured': return { fg: c.muted, bg: c.bg };
+  }
+}
+
+export default function FeedbackScreen() {
   const c = useColors();
   const s = useSubmission();
-  // Scoring sees photos and measurements only; group attributes are never passed in.
-  const report = useMemo(() => scoreSubmission({ photos: s.photos, measurements: s.measurements }), [s.photos, s.measurements]);
-
-  const notMeasured = report.criteria.filter((r) => r.score === null).length;
+  // Photo feedback sees photos only. The model card goes to the details group; fairness answers go nowhere.
+  const feedback = useMemo(
+    () => buildFeedback({ photos: s.photos, card: { measurements: s.measurements, age: s.age, experience: s.experience } }),
+    [s.photos, s.measurements, s.age, s.experience],
+  );
 
   if (!s.consented) return <Redirect href="/consent" />;
   if (!requiredPhotos.some((id) => s.photos[id])) return <Redirect href="/profile" />;
 
+  const toImprove = [...feedback.photos, ...feedback.details].filter((x) => x.status === 'improve' || x.status === 'missing').length;
+
   return (
     <Screen step={2}>
       <View>
-        <View style={local.total} aria-live="polite">
-          <Text style={[local.num, { color: c.ink }]}>{report.total}</Text>
-          <Text style={[local.of, { color: c.muted }]}>out of 100</Text>
-        </View>
+        <H2>Your feedback</H2>
         <Lede style={{ marginTop: 12 }}>
-          This is the score under the prototype&apos;s provisional rubric. It measures how complete and technically clear your submission is, not how you look. Each criterion below shows how it was scored.
-          {notMeasured > 0 &&
-            ` ${notMeasured} ${notMeasured > 1 ? 'criteria' : 'criterion'} could not be measured and ${notMeasured > 1 ? 'are' : 'is'} left out, so the total is out of the remaining ${report.countedWeight} points, scaled to 100.`}
+          {toImprove === 0
+            ? 'Everything we check looks ready to send.'
+            : `${toImprove} ${toImprove > 1 ? 'things' : 'thing'} to add or improve before you send your digitals.`}{' '}
+          This checks how complete and technically clear your submission is, not how you look.
         </Lede>
         <View style={local.thumbs}>
           {requiredPhotos.map((id) => {
@@ -42,15 +56,15 @@ export default function Score() {
         </View>
       </View>
 
-      {report.criteria.map((r) => (
-        <CriterionCard key={r.criterion.id} r={r} />
-      ))}
+      <Group title="Your photos" checks={feedback.photos} />
+      <Group title="Your details" checks={feedback.details} />
 
       <Note>
-        In the study, the criteria and weights will come from interviews with professional scouts, and scouts will be able to review and override every score.
+        In the study, the checks will come from interviews with professional scouts, and scouts will be able to review and override every piece of feedback.
       </Note>
       <Actions>
-        <Button label="Edit my profile" onPress={() => (router.canGoBack() ? router.back() : router.replace('/profile'))} />
+        <Button label="See matching agencies" onPress={() => router.push('/agencies')} />
+        <Button label="Edit my profile" variant="secondary" onPress={() => (router.canGoBack() ? router.back() : router.replace('/profile'))} />
         <Button
           label="Start over and delete my photos"
           variant="secondary"
@@ -64,52 +78,63 @@ export default function Score() {
   );
 }
 
-function CriterionCard({ r }: { r: ScoredCriterion }) {
-  const c = useColors();
+function Group({ title, checks }: { title: string; checks: Check[] }) {
   return (
-    <View style={[local.crit, { backgroundColor: c.surface, borderColor: c.line }]}>
+    <View style={{ gap: 12 }}>
+      <H2 style={{ marginTop: 8 }}>{title}</H2>
+      {checks.map((x) => (
+        <CheckCard key={x.id} check={x} />
+      ))}
+    </View>
+  );
+}
+
+function StatusBadge({ status }: { status: Status }) {
+  const c = useColors();
+  const { fg, bg } = statusColours(status, c);
+  return (
+    <View style={[local.badge, { backgroundColor: bg, borderColor: fg }]}>
+      <Text style={[ui.small, { color: fg, fontWeight: '700' }]}>{`${STATUS_MARK[status]} ${STATUS_LABEL[status]}`}</Text>
+    </View>
+  );
+}
+
+function CheckCard({ check }: { check: Check }) {
+  const c = useColors();
+  const section = check.guide ? GUIDE.find((g) => g.id === check.guide) : undefined;
+  const showTip = check.status !== 'good';
+  return (
+    <View
+      style={[local.card, { backgroundColor: c.surface, borderColor: c.line }]}
+      accessibilityLabel={`${check.name}: ${STATUS_LABEL[check.status]}`}>
       <View style={local.head}>
-        <H3>{r.criterion.name}</H3>
-        {r.score === null ? (
-          <Text>
-            <Text style={[local.score, { color: c.muted }]}>Not measured</Text>
-            <Text style={[ui.small, { color: c.muted }]}>{`  not counted (worth ${r.criterion.weight} points)`}</Text>
-          </Text>
-        ) : (
-          <Text>
-            <Text style={[local.score, { color: c.ink }]}>{r.score}/100</Text>
-            <Text style={[ui.small, { color: c.muted }]}>{`  adds ${r.points} of ${r.criterion.weight} points`}</Text>
-          </Text>
-        )}
+        <H3>{check.name}</H3>
+        <StatusBadge status={check.status} />
       </View>
-      <View
-        role="img"
-        accessibilityLabel={r.score === null ? 'Not measured' : `${r.score} out of 100`}
-        style={[local.bar, { backgroundColor: c.line }]}>
-        <View style={{ width: `${r.score ?? 0}%`, height: '100%', backgroundColor: c.accent }} />
-      </View>
-      <Text style={[ui.body, { color: c.ink, marginTop: 12 }]}>{r.reason}</Text>
-      <Text
-        style={[
-          ui.small,
-          local.tip,
-          r.ok ? { color: c.accent, backgroundColor: c.accentSoft } : { color: c.warn, backgroundColor: c.warnSoft },
-        ]}>
-        {r.tip}
-      </Text>
+      <Text style={[ui.body, { color: c.ink }]}>{check.reason}</Text>
+      {showTip && (
+        <View style={[local.tip, { backgroundColor: c.bg }]}>
+          <Text style={[ui.small, { color: c.ink }]}>
+            <Text style={{ fontWeight: '700' }}>Tip: </Text>
+            {check.tip}
+          </Text>
+          {section && (
+            <Link href={{ pathname: '/digitals', params: { section: section.id } }} style={[ui.small, local.link, { color: c.accent }]}>
+              {`How to take digitals: ${section.title.toLowerCase()} →`}
+            </Link>
+          )}
+        </View>
+      )}
     </View>
   );
 }
 
 const local = StyleSheet.create({
-  total: { flexDirection: 'row', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' },
-  num: { fontSize: 96, lineHeight: 96, fontWeight: '700', letterSpacing: -2.5 },
-  of: { fontSize: 24 },
   thumbs: { flexDirection: 'row', gap: 8, marginTop: 20 },
   thumb: { width: 64, height: 84, borderWidth: 1 },
-  crit: { borderWidth: 1, borderRadius: 8, paddingVertical: 18, paddingHorizontal: 20 },
-  head: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, marginBottom: 10 },
-  score: { fontSize: 22, fontWeight: '700' },
-  bar: { height: 10, borderRadius: 2, overflow: 'hidden' },
-  tip: { marginTop: 8, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 6, overflow: 'hidden' },
+  card: { borderWidth: 1, borderRadius: 8, paddingVertical: 16, paddingHorizontal: 20, gap: 10 },
+  head: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
+  badge: { borderWidth: 1, borderRadius: 999, paddingVertical: 2, paddingHorizontal: 10 },
+  tip: { paddingVertical: 10, paddingHorizontal: 12, borderRadius: 6, gap: 6 },
+  link: { fontWeight: '600', textDecorationLine: 'underline', paddingVertical: 4 },
 });

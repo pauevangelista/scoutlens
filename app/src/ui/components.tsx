@@ -1,32 +1,45 @@
 // Shared building blocks, styled after the prototype.
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useColors } from './theme';
 
-const STEPS = ['1. Consent', '2. Your profile', '3. Your score'];
+const STEPS = ['1. Consent', '2. Your profile', '3. Feedback', '4. Agencies'];
 
-export function Screen({ step, children }: { step: 0 | 1 | 2; children: ReactNode }) {
+/** `step` highlights the progress bar; leave it out on pages outside the main flow, such as the guide. */
+export function Screen({
+  step,
+  children,
+  scrollRef,
+  onStackLayout,
+}: {
+  step?: 0 | 1 | 2 | 3;
+  children: ReactNode;
+  scrollRef?: RefObject<ScrollView | null>;
+  /** Reports where the content stack starts inside the scroll view, so a page can scroll to a section. */
+  onStackLayout?: (y: number) => void;
+}) {
   const c = useColors();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         <View style={styles.wrap}>
           <View style={styles.top}>
             <Text style={[styles.brand, { color: c.ink }]}>ScoutLens</Text>
-            <Text style={[styles.small, { color: c.muted }]}>Prototype v0. Demo rubric, not a real assessment.</Text>
+            <Text style={[styles.small, { color: c.muted }]}>Prototype v0. Demo feedback, not a real assessment.</Text>
           </View>
 
           <View style={styles.steps} accessibilityLabel="Progress" role="list">
             {STEPS.map((label, i) => {
               const current = i === step;
+              const reached = step !== undefined && i <= step;
               return (
                 <View
                   key={label}
                   role="listitem"
                   aria-current={current ? 'step' : undefined}
-                  style={[styles.stepItem, { borderTopColor: i <= step ? c.accent : c.line }]}>
+                  style={[styles.stepItem, { borderTopColor: reached ? c.accent : c.line }]}>
                   <Text style={[styles.small, { color: current ? c.ink : c.muted, fontWeight: current ? '600' : '400' }]}>
                     {label}
                   </Text>
@@ -35,10 +48,12 @@ export function Screen({ step, children }: { step: 0 | 1 | 2; children: ReactNod
             })}
           </View>
 
-          <View style={styles.stack}>{children}</View>
+          <View style={styles.stack} onLayout={onStackLayout ? (e) => onStackLayout(e.nativeEvent.layout.y) : undefined}>
+            {children}
+          </View>
 
           <Text style={[styles.fine, { color: c.muted, borderTopColor: c.line }]}>
-            Prototype for a university capstone study on explainable scoring in model scouting. Everything runs on your device.
+            Prototype for a university capstone study on explainable feedback in model scouting. Everything runs on your device.
           </Text>
         </View>
       </ScrollView>

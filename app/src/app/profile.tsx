@@ -1,11 +1,11 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Redirect, router } from 'expo-router';
+import { Link, Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { measurePhoto } from '@/photo/measure';
 import { slotCopy } from '@/scoring/photo-slots';
-import { measurementFields, requiredPhotos } from '@/scoring/rubric';
+import { experienceLevels, measurementFields, requiredPhotos, rubric } from '@/scoring/rubric';
 import { useSubmission } from '@/state/submission';
 import { Actions, Button, ChoiceGroup, H2, Lede, Note, Panel, Screen, styles as ui } from '@/ui/components';
 import { useColors, type Colors } from '@/ui/theme';
@@ -35,14 +35,17 @@ export default function Profile() {
     }
   }
 
-  function getScore() {
+  function seeFeedback() {
     if (!requiredPhotos.some((id) => s.photos[id])) {
-      setError('Add at least one photo to get a score.');
+      setError('Add at least one photo to get feedback.');
       return;
     }
     setError('');
-    router.push('/score');
+    router.push('/feedback');
   }
+
+  const ageField = rubric.modelCard.age;
+  const experienceLabel = experienceLevels.find((l) => l.id === s.experience)?.label ?? null;
 
   const narrow = width < 680;
   const twoCols = width >= 520;
@@ -88,8 +91,14 @@ export default function Profile() {
         })}
       </View>
 
-      <H2 style={{ marginTop: 16 }}>Your measurements</H2>
-      <Panel>
+      <H2 style={{ marginTop: 16 }}>Your model card</H2>
+      <Lede style={{ marginTop: -12 }}>
+        Agencies ask for these details with your digitals. We never ask for your weight.{' '}
+        <Link href={{ pathname: '/digitals', params: { section: 'measuring' } }} style={{ color: c.accent, textDecorationLine: 'underline' }}>
+          How to measure yourself
+        </Link>
+      </Lede>
+      <Panel style={{ gap: 20 }}>
         <View style={local.grid}>
           {measurementFields.map((f) => (
             <View key={f.id} style={{ width: twoCols ? '48%' : '100%', flexGrow: 1 }}>
@@ -104,12 +113,35 @@ export default function Profile() {
               />
             </View>
           ))}
+          <View style={{ width: twoCols ? '48%' : '100%', flexGrow: 1 }}>
+            <Text style={[ui.label, { color: c.ink }]}>{`${ageField.label} (${ageField.unit})`}</Text>
+            <TextInput
+              accessibilityLabel={`${ageField.label} (${ageField.unit})`}
+              inputMode="numeric"
+              keyboardType="number-pad"
+              value={s.age}
+              onChangeText={s.setAge}
+              style={inputStyle(c)}
+            />
+          </View>
         </View>
+        <ChoiceGroup
+          label="Experience"
+          emptyLabel="Not chosen"
+          options={experienceLevels.map((l) => l.label)}
+          value={experienceLabel}
+          onChange={(label) => s.setExperience(experienceLevels.find((l) => l.label === label)?.id ?? null)}
+        />
+        <Note>
+          Division: each agency uses its own categories, so you choose a division for each agency on the agencies screen.
+        </Note>
       </Panel>
 
       <H2 style={{ marginTop: 16 }}>Help us test for fairness (optional)</H2>
       <Panel style={{ gap: 20 }}>
-        <Note>These answers are never used in your score. They let the study check that scores don&apos;t differ between groups.</Note>
+        <Note>
+          These answers are never used for your feedback or agency matches. They let the study check that feedback doesn&apos;t differ between groups.
+        </Note>
         <ChoiceGroup
           label="Gender"
           emptyLabel="Prefer not to say"
@@ -130,7 +162,7 @@ export default function Profile() {
         {error}
       </Text>
       <Actions>
-        <Button label="Get my score" onPress={getScore} />
+        <Button label="See my feedback" onPress={seeFeedback} />
         <Button
           label="Back"
           variant="secondary"

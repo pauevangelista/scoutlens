@@ -11,9 +11,9 @@ export default function Consent() {
 
   return (
     <Screen step={0}>
-      <H1>See exactly how your submission is scored.</H1>
+      <H1>Get clear feedback on your digitals.</H1>
       <Lede>
-        Add three standard photos and your basic measurements. You get a score for each criterion, with the reason behind it and what to change.
+        Add three standard photos and your model card. For each check you see what is good, what to improve and how, plus which agencies&apos; published requirements you match and why.
       </Lede>
       <Panel style={{ paddingVertical: 8 }}>
         {CONSENT_STATEMENTS.map((label, i) => (
