@@ -17,3 +17,4 @@ __pycache__/
 .venv/
 analysis/data/
 data/private/
+.claude/
