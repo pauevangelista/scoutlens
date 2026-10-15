@@ -27,6 +27,8 @@ export type Agency = {
   age: { min: number | null; max: number | null; notes?: string };
   /** Experience level ids (from rubric.json) the agency says it accepts, when it publishes this. */
   experience?: { accepts: string[]; source?: Source } | null;
+  /** Aim ids (runway, editorial, commercial) the agency says it focuses on, when it publishes this. Only orders the list. */
+  focus?: { aims: string[]; source: Source } | null;
   how_to_apply: string;
   upfront_fees: boolean | null;
   /** Date the record was checked against the agency's own page, or null if it never was. */
@@ -88,6 +90,7 @@ function checkSeed(seed: Seed): Seed {
     if (a.last_verified !== null && !/^\d{4}-\d{2}-\d{2}$/.test(a.last_verified)) {
       throw new Error(`Agency "${a.id}" has last_verified "${a.last_verified}"; use YYYY-MM-DD or null.`);
     }
+    if (a.focus && !a.focus.source?.url) throw new Error(`Agency "${a.id}" has a focus with no source.`);
     if (!a.divisions?.length) throw new Error(`Agency "${a.id}" needs its own list of divisions.`);
     for (const d of a.divisions) {
       for (const [field, r] of Object.entries(d.measurements ?? {})) {

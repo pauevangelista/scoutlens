@@ -1,11 +1,19 @@
 // Content of the "How to take digitals" guide. Section ids are what rubric.json criteria and the
 // feedback tips link to (criterion "guide" field), so renaming one here means updating the rubric.
-export type GuideSection = { id: string; title: string; intro: string; steps: string[] };
+export type GuideSection = {
+  id: string;
+  title: string;
+  /** Link text on a note that points to this section. */
+  cta: string;
+  intro: string;
+  steps: string[];
+};
 
 export const GUIDE: GuideSection[] = [
   {
     id: 'shots',
     title: 'The three shots',
+    cta: 'See how to shoot the three photos',
     intro: 'Digitals are plain, recent photos that show agencies what you look like today.',
     steps: [
       'Face close-up: head and shoulders, facing the camera, chin level, hair away from your face.',
@@ -17,6 +25,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'light',
     title: 'Light',
+    cta: 'See how to use daylight',
     intro: 'Soft, even daylight shows you as you are and keeps colours true.',
     steps: [
       'Stand facing a window in daylight, not in direct sun.',
@@ -28,6 +37,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'background',
     title: 'Background',
+    cta: 'See how to choose a wall',
     intro: 'A plain background keeps the attention on you and lets the app check colour.',
     steps: [
       'Use a plain white or light grey wall with nothing on it.',
@@ -38,6 +48,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'clothes',
     title: 'What to wear',
+    cta: 'See what to wear',
     intro: 'Agencies want to see your shape and features, not an outfit.',
     steps: [
       'Fitted, plain clothes in a solid colour: for example a fitted top and fitted jeans or leggings.',
@@ -49,6 +60,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'camera',
     title: 'Camera and focus',
+    cta: 'See how to get a sharp photo',
     intro: 'Sharp photos let agencies see detail.',
     steps: [
       'Use the rear camera, not the selfie camera.',
@@ -61,6 +73,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'export',
     title: 'Sending the files',
+    cta: 'See how to send the files',
     intro: 'Compression and edits remove the detail agencies look for.',
     steps: [
       'Use the original file from your camera roll.',
@@ -71,6 +84,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'measuring',
     title: 'Measuring yourself',
+    cta: 'See how to measure yourself',
     intro: 'Use a soft tape measure in centimetres, ideally with someone helping. Keep the tape snug, not tight, and level with the floor.',
     steps: [
       'Height: without shoes, heels against a wall, looking straight ahead. Mark the top of your head and measure to the floor.',

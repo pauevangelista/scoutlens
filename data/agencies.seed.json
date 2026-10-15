@@ -9,6 +9,7 @@
     "'last_verified' is the date someone checked the record against the agency's own official page. It stays null until that happens, and the app treats null as stale. 'found_on' on a source is only the date the source was found.",
     "Optional per division: 'measurements' with 'chest', 'waist' or 'hips' ranges ({ min_cm, max_cm, source }), only when published or confirmed in writing by a scout. The app shows them only when the user opts in, and never uses them to decide a match.",
     "Optional per agency: 'experience' ({ accepts: [experience level ids from rubric.json], source }), only when the agency publishes it.",
+    "Optional per agency: 'focus' ({ aims: ['runway' | 'editorial' | 'commercial'], source }), only when the agency publishes it. It only changes the order agencies are listed in.",
     "'past_event': true marks a dated event that may be over. It stays listed as an example of published criteria."
   ],
   "agencies": [
