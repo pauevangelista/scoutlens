@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ScoutLens prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EEF1F3;
+  --surface: #FFFFFF;
+  --ink: #1B2430;
+  --muted: #55606C;
+  --line: #CDD4D9;
+  --accent: #0B6B77;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D9EDEF;
+  --warn: #8A5A00;
+  --warn-soft: #FBEFD6;
+  --err: #A12B2B;
+  --focus: #0B6B77;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12181F;
+    --surface: #1B232C;
+    --ink: #E8EDF1;
+    --muted: #A2ADB8;
+    --line: #38434E;
+    --accent: #4FC3CF;
+    --accent-ink: #0B1A1D;
+    --accent-soft: #17383C;
+    --warn: #F0C36A;
+    --warn-soft: #3A2E12;
+    --err: #FF9C9C;
+    --focus: #4FC3CF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12181F;
+  --surface: #1B232C;
+  --ink: #E8EDF1;
+  --muted: #A2ADB8;
+  --line: #38434E;
+  --accent: #4FC3CF;
+  --accent-ink: #0B1A1D;
+  --accent-soft: #17383C;
+  --warn: #F0C36A;
+  --warn-soft: #3A2E12;
+  --err: #FF9C9C;
+  --focus: #4FC3CF;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.wrap { max-width: 880px; margin: 0 auto; padding: 20px 20px 64px; }
+header.top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 8px 0 20px; flex-wrap: wrap; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; }
+.tag { color: var(--muted); font-size: 14px; }
+
+ol.steps { list-style: none; display: flex; gap: 8px; padding: 0; margin: 0 0 28px; }
+ol.steps li { flex: 1; border-top: 3px solid var(--line); padding-top: 8px; font-size: 14px; color: var(--muted); }
+ol.steps li[aria-current="step"] { border-color: var(--accent); color: var(--ink); font-weight: 600; }
+ol.steps li.done { border-color: var(--accent); }
+
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; letter-spacing: -0.015em; margin: 0; }
+h1 { font-size: clamp(32px, 6vw, 48px); font-weight: 700; max-width: 16ch; }
+h2 { font-size: 26px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 700; }
+p { margin: 0; }
+.lede { font-size: 18px; color: var(--muted); max-width: 52ch; margin-top: 16px; }
+section[hidden] { display: none; }
+.stack > * + * { margin-top: 20px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 20px; }
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; }
+.check + .check { border-top: 1px solid var(--line); }
+.check input { width: 22px; height: 22px; margin-top: 2px; flex: none; accent-color: var(--accent); }
+.check label { cursor: pointer; }
+
+button, .btn {
+  font: inherit; font-weight: 600; cursor: pointer;
+  background: var(--accent); color: var(--accent-ink);
+  border: 2px solid var(--accent); border-radius: 6px;
+  padding: 12px 20px; min-height: 44px;
+}
+button.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:hover:not(:disabled) { filter: brightness(1.08); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+/* photo frames with crop marks */
+.frames { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 680px) { .frames { grid-template-columns: 1fr; } }
+.slot { position: relative; }
+.frame {
+  position: relative; display: block; aspect-ratio: 3 / 4;
+  background: var(--surface); border: 1px solid var(--line);
+  cursor: pointer; overflow: hidden;
+}
+.frame:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.frame input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.marks {
+  position: absolute; inset: 8px; pointer-events: none; z-index: 2;
+  --m: var(--ink); --t: 2px; --l: 16px;
+  background:
+    linear-gradient(var(--m), var(--m)) top left / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--m), var(--m)) top left / var(--t) var(--l) no-repeat,
+    linear-gradient(var(--m), var(--m)) top right / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--m), var(--m)) top right / var(--t) var(--l) no-repeat,
+    linear-gradient(var(--m), var(--m)) bottom left / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--m), var(--m)) bottom left / var(--t) var(--l) no-repeat,
+    linear-gradient(var(--m), var(--m)) bottom right / var(--l) var(--t) no-repeat,
+    linear-gradient(var(--m), var(--m)) bottom right / var(--t) var(--l) no-repeat;
+}
+.frame.has-img .marks { --m: #FFFFFF; mix-blend-mode: difference; }
+.empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 6px; }
+.empty strong { font-family: var(--display); font-size: 18px; }
+.empty span { color: var(--muted); font-size: 14px; }
+.frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.slot .rm { position: absolute; right: 12px; bottom: 12px; z-index: 3; padding: 6px 12px; min-height: 36px; font-size: 14px; background: var(--surface); color: var(--ink); border-color: var(--line); }
+.slot-tip { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+.field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.field .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+input[type=number], select {
+  font: inherit; width: 100%; padding: 10px 12px; min-height: 44px;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+}
+.note { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 14px; }
+.error { color: var(--err); font-weight: 600; margin-top: 12px; min-height: 1.4em; }
+
+/* results */
+.total { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.total .num { font-family: var(--display); font-weight: 700; font-size: clamp(64px, 14vw, 104px); line-height: 0.95; letter-spacing: -0.03em; }
+.total .of { font-size: 24px; color: var(--muted); }
+.bar { height: 10px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); }
+.crit { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; }
+.crit-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.crit-head .pts { color: var(--muted); font-size: 14px; }
+.crit .score { font-family: var(--display); font-weight: 700; font-size: 22px; }
+.crit .reason { margin-top: 12px; }
+.crit .tip { margin-top: 8px; font-size: 14px; color: var(--warn); background: var(--warn-soft); padding: 8px 12px; border-radius: 6px; }
+.crit .tip.ok { color: var(--accent); background: var(--accent-soft); }
+.thumbs { display: flex; gap: 8px; margin-top: 20px; }
+.thumbs img { width: 64px; height: 84px; object-fit: cover; border: 1px solid var(--line); }
+footer.fine { margin-top: 40px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: no-preference) {
+  .bar > i { transition: width 500ms ease-out; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">ScoutLens</div>
+    <div class="tag">Prototype v0. Demo rubric, not a real assessment.</div>
+  </header>
+
+  <ol class="steps" id="steps" aria-label="Progress">
+    <li data-step="0" aria-current="step">1. Consent</li>
+    <li data-step="1">2. Your profile</li>
+    <li data-step="2">3. Your score</li>
+  </ol>
+
+  <!-- STEP 1: consent -->
+  <section id="s0" class="stack">
+    <h1>See exactly how your submission is scored.</h1>
+    <p class="lede">Add three standard photos and your basic measurements. You get a score for each criterion, with the reason behind it and what to change.</p>
+    <div class="panel">
+      <div class="check">
+        <input type="checkbox" id="c18">
+        <label for="c18">I am 18 or older.</label>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="cdev">
+        <label for="cdev">I understand that in this prototype my photos stay on my device. Nothing is uploaded or saved, and closing this page deletes everything.</label>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="cdemo">
+        <label for="cdemo">I understand the score is a demo. It measures how complete and technically clear a submission is, not how I look.</label>
+      </div>
+    </div>
+    <div class="actions"><button id="go1" disabled>Continue to my profile</button></div>
+  </section>
+
+  <!-- STEP 2: profile -->
+  <section id="s1" class="stack" hidden>
+    <h2>Add your photos</h2>
+    <p class="lede" style="margin-top:8px">Use natural light, a plain background and no filters or retouching.</p>
+    <div class="frames" id="frames"></div>
+
+    <h2 style="margin-top:36px">Your measurements</h2>
+    <div class="panel">
+      <div class="grid2">
+        <div class="field"><label for="m-height">Height (cm)</label><input type="number" id="m-height" inputmode="decimal" min="0"></div>
+        <div class="field"><label for="m-chest">Chest or bust (cm)</label><input type="number" id="m-chest" inputmode="decimal" min="0"></div>
+        <div class="field"><label for="m-waist">Waist (cm)</label><input type="number" id="m-waist" inputmode="decimal" min="0"></div>
+        <div class="field"><label for="m-hips">Hips (cm)</label><input type="number" id="m-hips" inputmode="decimal" min="0"></div>
+        <div class="field"><label for="m-shoe">Shoe size (EU)</label><input type="number" id="m-shoe" inputmode="decimal" min="0" step="0.5"></div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:36px">Help us test for fairness (optional)</h2>
+    <div class="panel stack">
+      <div class="note">These answers are never used in your score. They let the study check that scores don't differ between groups.</div>
+      <div class="grid2">
+        <div class="field">
+          <label for="g-gender">Gender</label>
+          <select id="g-gender"><option value="">Prefer not to say</option><option>Woman</option><option>Man</option><option>Non-binary</option><option>Another description</option></select>
+        </div>
+        <div class="field">
+          <label for="g-age">Age band</label>
+          <select id="g-age"><option value="">Prefer not to say</option><option>18 to 21</option><option>22 to 25</option><option>26 to 30</option><option>31 or older</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div id="err1" class="error" role="alert" aria-live="assertive"></div>
+    <div class="actions">
+      <button id="score">Get my score</button>
+      <button class="secondary" id="back0">Back</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: results -->
+  <section id="s2" class="stack" hidden>
+    <div>
+      <div class="total" aria-live="polite"><span class="num" id="totalNum">0</span><span class="of">out of 100</span></div>
+      <p class="lede" style="margin-top:12px">This is the score under the prototype's provisional rubric. It measures how complete and technically clear your submission is, not how you look. Each criterion below shows how it was scored.</p>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+    <div id="crits" class="stack"></div>
+    <div class="note">In the study, the criteria and weights will come from interviews with professional scouts, and scouts will be able to review and override every score.</div>
+    <div class="actions">
+      <button id="edit">Edit my profile</button>
+      <button class="secondary" id="reset">Start over and delete my photos</button>
+    </div>
+  </section>
+
+  <footer class="fine">Prototype for a university capstone study on explainable scoring in model scouting. Everything runs in your browser.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- Provisional rubric. Replace criteria and weights with the scout-derived rubric. ----
+  var SLOTS = [
+    { key: "face", name: "Face close-up", tip: "Head and shoulders, facing the camera." },
+    { key: "full", name: "Full length", tip: "Head to toe, standing straight, fitted clothes." },
+    { key: "side", name: "Side profile", tip: "Same framing, turned 90 degrees." }
+  ];
+  var FIELDS = [
+    { id: "height", label: "Height", min: 140, max: 220, unit: "cm" },
+    { id: "chest", label: "Chest or bust", min: 60, max: 140, unit: "cm" },
+    { id: "waist", label: "Waist", min: 45, max: 130, unit: "cm" },
+    { id: "hips", label: "Hips", min: 60, max: 150, unit: "cm" },
+    { id: "shoe", label: "Shoe size", min: 33, max: 50, unit: "EU" }
+  ];
+  var RUBRIC = [
+    { id: "set",   name: "Photo set",        weight: 40, run: scoreSet },
+    { id: "res",   name: "Image resolution", weight: 20, run: scoreRes },
+    { id: "light", name: "Exposure",         weight: 20, run: scoreLight },
+    { id: "meas",  name: "Measurements",     weight: 20, run: scoreMeas }
+  ];
+
+  var state = { photos: [null, null, null], urls: [null, null, null], stats: [null, null, null] };
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---- Step navigation ----
+  function show(n) {
+    [0, 1, 2].forEach(function (i) { $("s" + i).hidden = (i !== n); });
+    var items = document.querySelectorAll("#steps li");
+    items.forEach(function (li, i) {
+      li.classList.toggle("done", i < n);
+      if (i === n) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+    });
+    window.scrollTo(0, 0);
+  }
+
+  // ---- Consent ----
+  var cbs = ["c18", "cdev", "cdemo"].map($);
+  function syncConsent() { $("go1").disabled = !cbs.every(function (c) { return c.checked; }); }
+  cbs.forEach(function (c) { c.addEventListener("change", syncConsent); });
+  $("go1").addEventListener("click", function () { show(1); });
+  $("back0").addEventListener("click", function () { show(0); });
+
+  // ---- Photo frames ----
+  var framesEl = $("frames");
+  SLOTS.forEach(function (s, i) {
+    var slot = document.createElement("div");
+    slot.className = "slot";
+    slot.innerHTML =
+      '<label class="frame" id="frame' + i + '">' +
+      '<span class="marks"></span>' +
+      '<span class="empty" id="empty' + i + '"><strong>' + s.name + '</strong><span>Tap to add a photo</span></span>' +
+      '<input type="file" accept="image/*" id="file' + i + '" aria-label="Add ' + s.name + ' photo">' +
+      '</label>' +
+      '<button class="rm secondary" id="rm' + i + '" hidden>Remove</button>' +
+      '<p class="slot-tip">' + s.tip + '</p>';
+    framesEl.appendChild(slot);
+    $("file" + i).addEventListener("change", function (e) { loadPhoto(i, e.target.files && e.target.files[0]); });
+    $("rm" + i).addEventListener("click", function () { clearPhoto(i); });
+  });
+
+  function clearPhoto(i) {
+    if (state.urls[i]) URL.revokeObjectURL(state.urls[i]);
+    state.photos[i] = null; state.urls[i] = null; state.stats[i] = null;
+    var f = $("frame" + i), img = f.querySelector("img");
+    if (img) img.remove();
+    f.classList.remove("has-img");
+    $("empty" + i).hidden = false;
+    $("rm" + i).hidden = true;
+    $("file" + i).value = "";
+  }
+
+  function loadPhoto(i, file) {
+    if (!file) return;
+    $("err1").textContent = "";
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      var c = document.createElement("canvas");
+      c.width = 64; c.height = 64;
+      var ctx = c.getContext("2d");
+      ctx.drawImage(img, 0, 0, 64, 64);
+      var d = ctx.getImageData(0, 0, 64, 64).data, sum = 0, n = 0;
+      for (var p = 0; p < d.length; p += 4) {
+        sum += (0.2126 * d[p] + 0.7152 * d[p + 1] + 0.0722 * d[p + 2]) / 255; n++;
+      }
+      if (state.urls[i]) URL.revokeObjectURL(state.urls[i]);
+      state.photos[i] = file; state.urls[i] = url;
+      state.stats[i] = { short: Math.min(img.naturalWidth, img.naturalHeight), lum: sum / n };
+      var f = $("frame" + i), old = f.querySelector("img");
+      if (old) old.remove();
+      var el = document.createElement("img");
+      el.src = url; el.alt = SLOTS[i].name + " preview";
+      f.insertBefore(el, f.firstChild);
+      f.classList.add("has-img");
+      $("empty" + i).hidden = true;
+      $("rm" + i).hidden = false;
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      $("err1").textContent = "We couldn't read that file. Use a JPG or PNG photo.";
+      $("file" + i).value = "";
+    };
+    img.src = url;
+  }
+
+  // ---- Reading inputs ----
+  function readMeas() {
+    var out = {};
+    FIELDS.forEach(function (f) {
+      var raw = $("m-" + f.id).value;
+      out[f.id] = raw === "" ? null : parseFloat(raw);
+    });
+    return out;
+  }
+
+  // ---- Scoring functions: each returns { score 0-100, reason, tip, ok } ----
+  function scoreSet() {
+    var have = [], missing = [];
+    SLOTS.forEach(function (s, i) { (state.photos[i] ? have : missing).push(s.name); });
+    var score = Math.round(have.length / SLOTS.length * 100);
+    return {
+      score: score,
+      reason: "You added " + have.length + " of " + SLOTS.length + " standard photos" + (missing.length ? " (missing: " + missing.join(", ").toLowerCase() + ")." : "."),
+      tip: missing.length ? "Add your " + missing[0].toLowerCase() + " photo." : "Nothing to change.",
+      ok: !missing.length
+    };
+  }
+  function scoreRes() {
+    var vals = state.stats.filter(Boolean).map(function (s) { return s.short; });
+    if (!vals.length) return { score: 0, reason: "There are no photos to measure.", tip: "Add at least one photo.", ok: false };
+    var per = vals.map(function (v) { return Math.min(1, v / 1200); });
+    var score = Math.round(per.reduce(function (a, b) { return a + b; }, 0) / per.length * 100);
+    var avg = Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length);
+    return {
+      score: score,
+      reason: "The shorter side of your photos averages " + avg.toLocaleString("en") + " px. Full marks start at 1,200 px.",
+      tip: score >= 100 ? "Nothing to change." : "Use the original file from your camera, not a screenshot or a messaging-app copy.",
+      ok: score >= 100
+    };
+  }
+  function lumScore(y) {
+    if (y >= 0.35 && y <= 0.70) return 100;
+    if (y < 0.35) return Math.max(0, (y - 0.10) / 0.25 * 100);
+    return Math.max(0, (0.95 - y) / 0.25 * 100);
+  }
+  function scoreLight() {
+    var ys = state.stats.filter(Boolean).map(function (s) { return s.lum; });
+    if (!ys.length) return { score: 0, reason: "There are no photos to measure.", tip: "Add at least one photo.", ok: false };
+    var score = Math.round(ys.map(lumScore).reduce(function (a, b) { return a + b; }, 0) / ys.length);
+    var avg = ys.reduce(function (a, b) { return a + b; }, 0) / ys.length;
+    var word = avg < 0.2 ? "too dark" : avg < 0.35 ? "a little dark" : avg <= 0.70 ? "well exposed" : avg <= 0.85 ? "a little bright" : "too bright";
+    var tip = score >= 100 ? "Nothing to change."
+      : avg < 0.35 ? "Stand facing a window in daylight."
+      : "Move out of direct sun or switch off the flash.";
+    return { score: score, reason: "Average brightness across your photos is " + Math.round(avg * 100) + "%, which is " + word + ".", tip: tip, ok: score >= 100 };
+  }
+  function scoreMeas() {
+    var m = readMeas(), valid = 0, missing = [], odd = [];
+    FIELDS.forEach(function (f) {
+      var v = m[f.id];
+      if (v === null || isNaN(v)) missing.push(f.label.toLowerCase());
+      else if (v < f.min || v > f.max) odd.push(f.label + " " + v + " " + f.unit);
+      else valid++;
+    });
+    var score = Math.round(valid / FIELDS.length * 100), parts = [];
+    parts.push("You gave " + valid + " of " + FIELDS.length + " measurements in a realistic range.");
+    if (odd.length) parts.push(odd.join(", ") + " looks like a typo.");
+    var tip = missing.length ? "Add: " + missing.join(", ") + "."
+      : odd.length ? "Check the value that looks off." : "Nothing to change.";
+    return { score: score, reason: parts.join(" "), tip: tip, ok: !missing.length && !odd.length };
+  }
+
+  // ---- Results ----
+  $("score").addEventListener("click", function () {
+    if (!state.photos.some(Boolean)) { $("err1").textContent = "Add at least one photo to get a score."; return; }
+    $("err1").textContent = "";
+    var results = RUBRIC.map(function (c) { var r = c.run(); r.c = c; return r; });
+    var total = Math.round(results.reduce(function (a, r) { return a + r.score * r.c.weight / 100; }, 0));
+    $("totalNum").textContent = total;
+
+    var th = $("thumbs"); th.innerHTML = "";
+    state.urls.forEach(function (u, i) {
+      if (!u) return;
+      var im = document.createElement("img"); im.src = u; im.alt = SLOTS[i].name; th.appendChild(im);
+    });
+
+    var wrap = $("crits"); wrap.innerHTML = "";
+    results.forEach(function (r) {
+      var pts = Math.round(r.score * r.c.weight / 100);
+      var d = document.createElement("div");
+      d.className = "crit";
+      d.innerHTML =
+        '<div class="crit-head"><h3>' + r.c.name + '</h3>' +
+        '<span><span class="score">' + r.score + '/100</span> <span class="pts">adds ' + pts + ' of ' + r.c.weight + ' points</span></span></div>' +
+        '<div class="bar" role="img" aria-label="' + r.score + ' out of 100"><i style="width:0%"></i></div>' +
+        '<p class="reason"></p><p class="tip' + (r.ok ? ' ok' : '') + '"></p>';
+      d.querySelector(".reason").textContent = r.reason;
+      d.querySelector(".tip").textContent = r.tip;
+      wrap.appendChild(d);
+      requestAnimationFrame(function () { d.querySelector(".bar i").style.width = r.score + "%"; });
+    });
+    show(2);
+  });
+
+  $("edit").addEventListener("click", function () { show(1); });
+  $("reset").addEventListener("click", function () {
+    for (var i = 0; i < 3; i++) clearPhoto(i);
+    FIELDS.forEach(function (f) { $("m-" + f.id).value = ""; });
+    $("g-gender").value = ""; $("g-age").value = "";
+    cbs.forEach(function (c) { c.checked = false; });
+    syncConsent();
+    show(0);
+  });
+})();
+</script>
+</body>
+</html>

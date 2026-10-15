@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+.expo/
+dist/
+build/
+.DS_Store
+# never commit personal data
+*.jpg
+*.jpeg
+*.png
+*.heic
+data/
+fixtures-real/

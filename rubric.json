@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "status": "provisional",
+  "note": "Placeholder criteria on submission quality. Replace with scout-derived criteria after interviews.",
+  "criteria": [
+    {
+      "id": "set",
+      "name": "Photo set",
+      "weight": 40,
+      "description": "Share of the three standard photos provided: face close-up, full length, side profile.",
+      "params": { "required": ["face", "full", "side"] }
+    },
+    {
+      "id": "res",
+      "name": "Image resolution",
+      "weight": 20,
+      "description": "Shorter image side compared with a 1,200 px target, averaged over photos.",
+      "params": { "targetShortSidePx": 1200 }
+    },
+    {
+      "id": "light",
+      "name": "Exposure",
+      "weight": 20,
+      "description": "Average brightness. Full marks between 35% and 70%, falling to zero at 10% and 95%.",
+      "params": { "fullMin": 0.35, "fullMax": 0.70, "zeroLow": 0.10, "zeroHigh": 0.95 }
+    },
+    {
+      "id": "meas",
+      "name": "Measurements",
+      "weight": 20,
+      "description": "Share of measurements provided in a realistic range. Completeness only; size is never scored.",
+      "params": {
+        "fields": [
+          { "id": "height", "label": "Height", "min": 140, "max": 220, "unit": "cm" },
+          { "id": "chest", "label": "Chest or bust", "min": 60, "max": 140, "unit": "cm" },
+          { "id": "waist", "label": "Waist", "min": 45, "max": 130, "unit": "cm" },
+          { "id": "hips", "label": "Hips", "min": 60, "max": 150, "unit": "cm" },
+          { "id": "shoe", "label": "Shoe size", "min": 33, "max": 50, "unit": "EU" }
+        ]
+      }
+    }
+  ]
+}
