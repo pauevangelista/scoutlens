@@ -1,6 +1,6 @@
 // Scoring functions, one per rubric criterion id. Weights and thresholds come from the rubric.
 // Scores are internal: they feed the analysis and the statuses in feedback.ts, and are never shown to users,
-// so reasons and tips describe the measurement and the target, not points.
+// so reasons and tips describe in plain words what we saw and what to change: no percentages, decimals or points.
 // Group attributes (gender, age band) are deliberately not part of ScoringInput.
 import type { Cast, PhotoAnalysis } from '@/photo/analyze';
 
@@ -92,11 +92,6 @@ function falloff(value: number, fullMax: number, zeroAt: number): number {
   return ((zeroAt - value) / (zeroAt - fullMax)) * 100;
 }
 
-function percent(share: number): string {
-  const p = share * 100;
-  return `${p > 0 && p < 1 ? p.toFixed(1) : Math.round(p)}%`;
-}
-
 /** Per-photo values for one lighting measurement, skipping photos where it is null. */
 function perPhoto<T>(input: ScoringInput, pick: (a: PhotoAnalysis) => T | null) {
   const photos = presentPhotos(input);
@@ -128,10 +123,14 @@ function scoreRes(params: ResParams, input: ScoringInput): CriterionResult {
   if (!sides.length) return NO_PHOTOS;
   const target = params.targetShortSidePx;
   const score = Math.round(mean(sides.map((v) => Math.min(1, v / target))) * 100);
-  const avg = Math.round(mean(sides));
+  const need = `${target.toLocaleString('en')} px on the shorter side`;
+  const small = sides.filter((v) => v < target).length;
   return {
     score,
-    reason: `The shorter side of your photos averages ${avg.toLocaleString('en')} px. We look for at least ${target.toLocaleString('en')} px so agencies can see detail.`,
+    reason:
+      small === 0
+        ? `Your photos are at least ${need}, enough for agencies to see detail.`
+        : `${small === sides.length ? 'Your photos are' : 'Some of your photos are'} smaller than ${need}, so agencies may not see enough detail.`,
     tip: score >= 100 ? NOTHING_TO_CHANGE : 'Use the original file from your camera, not a screenshot or a messaging-app copy.',
     ok: score >= 100,
   };
@@ -150,11 +149,13 @@ function scoreClipping(
   const scores = values.map((v) => falloff(v.value, params.fullMax, params.zeroAt));
   const score = Math.round(mean(scores));
   const worst = values.reduce((w, v) => (v.value > w.value ? v : w));
-  const what = kind === 'highlights' ? 'blown out to pure white' : 'crushed to pure black';
+  const [tone, area] = kind === 'highlights' ? ['pure white', 'bright'] : ['pure black', 'dark'];
   const parts = [
-    `On average ${percent(mean(values.map((v) => v.value)))} of each photo is ${what}. We look for ${percent(params.fullMax)} or less.`,
+    score >= 100
+      ? `Your photos keep detail in the ${area} areas. Almost nothing is ${tone}.`
+      : `${score >= 50 ? 'Parts' : 'Large parts'} of your photos are ${tone}, so detail is lost in the ${area} areas.`,
   ];
-  if (values.length > 1 && score < 100) parts.push(`Your ${photoName(worst.slot)} photo has the most (${percent(worst.value)}).`);
+  if (values.length > 1 && score < 100) parts.push(`Your ${photoName(worst.slot)} photo has the most.`);
   const fix =
     kind === 'highlights'
       ? 'out of direct sun, or with the flash switched off'
@@ -180,11 +181,13 @@ function scoreSharpness(params: SharpnessParams, input: ScoringInput): Criterion
   if (!values.length) return notMeasuredOnDevice('sharpness');
 
   const score = Math.round(mean(values.map((v) => sharpnessScore(v.value, params))));
-  const avg = mean(values.map((v) => v.value));
-  const word = score >= 100 ? 'sharp' : score >= 50 ? 'slightly soft' : 'blurry';
   const worst = values.reduce((w, v) => (v.value < w.value ? v : w));
   const parts = [
-    `The sharpest edges in your photos reach an edge sharpness of ${avg.toFixed(2)} on average. We look for ${params.fullAbove.toFixed(2)} or more, so they look ${word}.`,
+    score >= 100
+      ? 'Your photos look sharp, so agencies can see fine detail.'
+      : score >= 50
+        ? 'Your photos look slightly soft, so fine detail like hair and skin is less clear.'
+        : 'Your photos look blurry, so agencies cannot see detail.',
   ];
   if (values.length > 1 && score < 100) parts.push(`Your ${photoName(worst.slot)} photo is the least sharp.`);
   return {
@@ -229,12 +232,11 @@ function scoreCast(params: CastParams, input: ScoringInput): CriterionResult {
 
   const score = Math.round(mean(measured.map((v) => falloff(v.value.chroma, params.fullMax, params.zeroAt))));
   const avg = { a: mean(measured.map((v) => v.value.a)), b: mean(measured.map((v) => v.value.b)) };
-  const strength = Math.hypot(avg.a, avg.b);
   const dir = castDirection(avg);
   const parts = [
     score >= 100
-      ? `The plain areas of your photos are close to neutral grey (a tint of ${strength.toFixed(1)}; up to ${params.fullMax} counts as neutral).`
-      : `The plain areas of your photos lean ${dir} by ${strength.toFixed(1)}. Up to ${params.fullMax} counts as neutral.`,
+      ? 'The plain areas of your photos look neutral, with no noticeable colour tint.'
+      : `The plain areas of your photos have a ${score >= 50 ? 'slight' : 'strong'} ${dir} tint, so colours may not look true to life.`,
   ];
   if (skipped) {
     parts.push(`${skipped} photo${skipped > 1 ? 's' : ''} had no plain area to judge and ${skipped > 1 ? 'were' : 'was'} left out.`);

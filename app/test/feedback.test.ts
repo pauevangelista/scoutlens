@@ -45,10 +45,12 @@ describe('feedback', () => {
       }
     });
 
-    test(`no score, points or totals reach the user (${name})`, () => {
+    test(`no score, points, totals, percentages or decimals reach the user (${name})`, () => {
       for (const c of checks) {
         const text = `${c.name} ${c.reason} ${c.tip}`;
         assert.doesNotMatch(text, /\bscor|\bpoints?\b|\btotal\b|full marks|\/ ?100|out of 100/i, `${c.id}: ${text}`);
+        // Raw measurements read like a score. A dot between digits is a decimal; "1,200 px" is a requirement and passes.
+        assert.doesNotMatch(text, /%|\d\.\d/, `${c.id}: ${text}`);
       }
     });
   }

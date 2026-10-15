@@ -116,7 +116,7 @@ describe('scoreSubmission', () => {
 
   test('cast reason names the direction of the tint', () => {
     const report = scoreSubmission(INPUTS['poor lighting']);
-    assert.match(byId(report, 'cast').reason, /lean yellow/);
+    assert.match(byId(report, 'cast').reason, /yellow tint/);
   });
 
   test("a photo with no neutral area leaves colour cast unmeasured", () => {
