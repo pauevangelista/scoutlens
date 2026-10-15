@@ -10,9 +10,10 @@ build/
 *.jpeg
 *.png
 *.heic
-data/
 fixtures-real/
 # exception: Expo's placeholder app icons (no personal data)
 !app/assets/**/*.png
 __pycache__/
 .venv/
+analysis/data/
+data/private/

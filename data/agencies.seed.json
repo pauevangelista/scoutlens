@@ -1,0 +1,102 @@
+{
+  "version": "0.1.0",
+  "status": "seed: only entries with a source found on 2026-10-15; every entry still needs a check on the agency's official page and, for requirements, confirmation by a scout",
+  "rules": [
+    "Only record a requirement the agency publishes itself, or one a scout confirms in writing.",
+    "Height and age are the usual published requirements. Bust, waist and hips: add a range only if published or scout-confirmed, with source. Never add weight or BMI.",
+    "Division is chosen by the applicant. Use the agency's own categories.",
+    "Show 'last_verified' in the app. Treat anything older than 6 months as stale."
+  ],
+  "agencies": [
+    {
+      "id": "elite-world-group",
+      "name": "Elite Model Management / Elite World Group",
+      "type": "international agency",
+      "markets": ["international", "spain (Madrid, Barcelona offices per third-party list)"],
+      "divisions": [
+        { "id": "women", "label": "Women", "min_height_cm": 173, "notes": "5'8\" and taller" },
+        { "id": "men", "label": "Men", "min_height_cm": 183, "notes": "6'0\" and over" }
+      ],
+      "age": { "min": 18, "max": null, "notes": "Represents ages 18+" },
+      "how_to_apply": "Online form with several recent photos, a headshot and a full-length photo.",
+      "upfront_fees": null,
+      "sources": [
+        { "url": "https://www.backstage.com/resources/detail/manager/elite-model-managementelite-world-group-87132/", "kind": "third_party_listing" }
+      ],
+      "confidence": "low: third-party listing, date unknown. Check elite official site."
+    },
+    {
+      "id": "elite-uk-open-casting-event",
+      "name": "Elite Model Management, UK open casting (event record)",
+      "type": "open call (dated event, may be past)",
+      "markets": ["united kingdom"],
+      "divisions": [
+        { "id": "female-presenting", "label": "Female-presenting category (female or non-binary applicants)", "min_height_cm": 168, "notes": "5'6\"" },
+        { "id": "male-presenting", "label": "Male-presenting category (male or non-binary applicants)", "min_height_cm": 180, "notes": "5'11\"" }
+      ],
+      "age": { "min": 14, "max": 20, "notes": "Under 18 must attend with a parent or guardian" },
+      "how_to_apply": "Free; choose a time slot and apply online.",
+      "upfront_fees": false,
+      "sources": [
+        { "url": "https://at.westfield.com/en/united-kingdom/stratfordcity/events/elite-model-management-open-casting/132631", "kind": "event_page" }
+      ],
+      "confidence": "medium for that event only. Shows that applicants choose the category, including non-binary applicants."
+    },
+    {
+      "id": "elite-model-look",
+      "name": "Elite Model Look (competition)",
+      "type": "competition",
+      "markets": ["international"],
+      "divisions": [
+        { "id": "female", "label": "Female", "min_height_cm": 172 },
+        { "id": "male", "label": "Male", "min_height_cm": 188 }
+      ],
+      "age": { "min": null, "max": null, "notes": "not recorded" },
+      "how_to_apply": "National rounds in each participating country.",
+      "upfront_fees": null,
+      "sources": [
+        { "url": "https://en.wikipedia.org/wiki/Elite_Model_Look", "kind": "encyclopedia" }
+      ],
+      "confidence": "low: encyclopedia, rules change by year"
+    },
+    {
+      "id": "minoire",
+      "name": "MINOIRE",
+      "type": "agency",
+      "markets": ["spain"],
+      "divisions": [
+        { "id": "women", "label": "Women", "min_height_cm": 175 },
+        { "id": "men", "label": "Men", "min_height_cm": 185 }
+      ],
+      "age": { "min": null, "max": null, "notes": "age is asked in the application" },
+      "how_to_apply": "Website form: face photo, full-body photo, Instagram link if public, age, height, location. International applicants also add portfolio, video and updated digitals.",
+      "upfront_fees": null,
+      "sources": [
+        { "url": "https://www.que.es/2022/04/27/minoire-la-agencia-que-explica-que-hay-que-hacer-para-ser-modelo/", "kind": "press_article_2022" }
+      ],
+      "confidence": "medium: press article quoting the agency, 2022. Check minoire official site."
+    },
+    {
+      "id": "uno-models",
+      "name": "Uno Models",
+      "type": "agency",
+      "markets": ["spain (Madrid, Barcelona)"],
+      "divisions": [
+        { "id": "women", "label": "Women", "min_height_cm": null, "notes": "Director: 'normal from 1.75 m', with exceptions" }
+      ],
+      "age": { "min": null, "max": null, "notes": "not recorded" },
+      "how_to_apply": "Not recorded. Check the official site.",
+      "upfront_fees": null,
+      "sources": [
+        { "url": "https://www.marie-claire.es/planeta-mujer/3411.html", "kind": "interview" }
+      ],
+      "confidence": "low: an interview comment, not a published requirement"
+    }
+  ],
+  "to_verify_from_official_sites": [
+    "Traffic Models (Barcelona, Madrid)", "Francina Models (Barcelona)", "Uniko Models (Barcelona)",
+    "Trend Models (Barcelona)", "View Management (Madrid, Barcelona)", "Six Management (Madrid)",
+    "Elite Model Management Spain", "Sight Management Studio (Barcelona)", "5.0 Models Management (Valencia)",
+    "Agencia Globe (Zaragoza)"
+  ]
+}
